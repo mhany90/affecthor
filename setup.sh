@@ -25,7 +25,7 @@ TOOLDIR=$PWD/tools
 
 # ensure script runs from the root directory
 if ! [ -x "$PWD/setup.sh" ]; then
-    echo 'You must run setup.sh from the root directory'
+    echo '[INFO] You must run setup.sh from the root directory'
     exit 1
 fi
 
