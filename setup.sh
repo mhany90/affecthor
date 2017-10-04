@@ -1,6 +1,7 @@
 #!/bin/bash
 # this is a general setup script for this project
 
+
 # resume training with option --stage N
 stage=0
 
@@ -15,11 +16,14 @@ set -o pipefail
 
 # root directory for this project
 ROOTDIR=$PWD
+
 # data directory
 DATADIR=$PWD/data
+
 # source directory
 SRCDIR=$PWD/src
-# tools directory (external tools, libraries)
+
+# tools directory
 TOOLDIR=$PWD/tools
 
 
@@ -28,7 +32,6 @@ if ! [ -x "$PWD/setup.sh" ]; then
     echo '[INFO] You must run setup.sh from the root directory'
     exit 1
 fi
-
 
 # transform long options to short ones and parse them
 for arg in "$@"; do
@@ -48,9 +51,10 @@ do
 done
 
 
-# stage 0 - download and prepare data
+## STAGE 0 - download and prepare data
 if [ $stage -le 0 ]; then
     echo '[INFO] Downloading and preparing data...'
     . $DATADIR/prepare_data.sh
     echo '[INFO] Data is ready'
 fi
+
