@@ -100,33 +100,29 @@ init = tf.global_variables_initializer()
 with tf.Session() as sess:
     # start populating filename queue
     sess.run(init)
+    #call input pipeline and start queue runners (to load training bata in batches)
     features, labels = input_pipeline([input_data], batch_size)
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(coord=coord)
   
     # Training cycle
     for epoch in range(training_epochs):
-        avg_cost = 0.
-        print(total_lines)
-        total_batch = int(total_lines/batch_size)
+        avg_cost = 0. 
+        print(total_lines) 
+        total_batch = int(total_lines/batch_size) #total number of training examples / batch size
         print(total_batch)
         # Loop over all batches
         for x in range(total_batch) :
             # Run optimization op (backprop) and cost op (to get loss value)
-            #try:
-            feature_batch, label_batch = sess.run([features, labels])
-            #print(feature_batch)
-           # except tf.errors.OutOfRangeError:
-           #     print("error")
-#                feature_batch, label_batch = sess.run([features, labels])
-            batch_y = sess.run(tf.one_hot(label_batch, 2, 1.0, 0.0))
-            batch_y = np.reshape(batch_y, (-1, 2))
-            batch_x =  [x for x in feature_batch]
-            batch_x = np.reshape(batch_x, (-1, 43))
-            _, c = sess.run([train_op, loss_op], feed_dict={X: batch_x,
+            feature_batch, label_batch = sess.run([features, labels])  #get a new batch            
+            batch_y = sess.run(tf.one_hot(label_batch, 2, 1.0, 0.0))   #convert labels of 1(positive) and 0(negative) to one-hot-tensors
+            batch_y = np.reshape(batch_y, (-1, 2))       #-1 because the batch size can be anything
+            batch_x =  [x for x in feature_batch]        #probably okay to just say batch_x = feature_batch
+            batch_x = np.reshape(batch_x, (-1, 43))      #43 is the number of features, -1 for batch size
+            _, c = sess.run([train_op, loss_op], feed_dict={X: batch_x,       #Run training operation, and loss operation, returns loss
                                                               Y: batch_y})
           # Compute average loss
-            avg_cost += c / total_batch
+            avg_cost += c / total_batch            #average loss over all batches till now 
         # Display logs per epoch step
         if epoch % display_step == 0:
             print("Epoch:", '%04d' % (epoch+1), "cost={:.9f}".format(avg_cost))
