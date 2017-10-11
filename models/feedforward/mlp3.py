@@ -157,7 +157,7 @@ with tf.Session() as sess:
     
     # Test model
     pred = tf.nn.softmax(logits)  # Apply softmax to logits
-    correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(Y, 1))
+    correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(test_y, 1))
 #    print(sess.run(correct_prediction))
     # Calculate accuracy
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
