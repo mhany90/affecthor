@@ -1,0 +1,33 @@
+def read_my_file_format(filename_queue):
+    reader = tf.TextLineReader(skip_header_lines=0)
+    _, csv_row = reader.read(filename_queue)
+    record_defaults =  [['a'] for cl in range((45))]
+    parsed_line = tf.decode_csv(csv_row,record_defaults = record_defaults )
+    label = parsed_line[1] #the intensity
+    
+    # first element is the label
+    del parsed_line[1] # Delete first element
+    del parsed_line[0] #the emotion
+    feature = parsed_line
+#    print(label)
+    return feature, label
+
+def input_pipeline(filenames, batch_size, num_epochs=None):
+    filename_queue = tf.train.string_input_producer(filenames, 
+                                                    num_epochs=num_epochs, 
+                                                    shuffle=True)
+    feature, label = read_my_file_format(filename_queue)
+    min_after_dequeue = 200
+    capacity = min_after_dequeue + 3 * batch_size
+    feature_batch, label_batch = tf.train.shuffle_batch([feature, label], 
+                                                        batch_size=batch_size, 
+                                                        capacity=capacity,
+                                                        min_after_dequeue=min_after_dequeue)
+    print(label_batch)
+    return feature_batch, label_batch
+
+input_data = "EI-reg-En-anger-train.vectors.without.random.train.csv"
+
+features, labels = input_pipeline([input_data], batch_size)
+
+print(features)
