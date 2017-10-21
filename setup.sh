@@ -26,6 +26,9 @@ SRCDIR=$PWD/src
 # tools directory
 TOOLDIR=$PWD/tools
 
+# models directory
+MODELDIR=$PWD/models
+
 
 # ensure script runs from the root directory
 if ! [ -x "$PWD/setup.sh" ]; then
@@ -51,10 +54,18 @@ do
 done
 
 
-## STAGE 0 - download and prepare data
+## STAGE 0 - set up required tools
 if [ $stage -le 0 ]; then
-    echo '[INFO] Downloading and preparing data...'
+    echo '[INFO] Setting up required tools...'
+    . $TOOLDIR/prepare_tools.sh
+    echo '[INFO] Finished setting up tools'
+fi
+
+
+## STAGE 1 - download and prepare data
+if [ $stage -le 1 ]; then
+    echo '[INFO] Preparing data...'
     . $DATADIR/prepare_data.sh
-    echo '[INFO] Data is ready'
+    echo '[INFO] Finished preparing data'
 fi
 
