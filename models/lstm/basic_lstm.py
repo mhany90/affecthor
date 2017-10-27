@@ -130,7 +130,7 @@ pearson = tf.contrib.metrics.streaming_pearson_correlation(logits, Y, name="pear
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
 
-with tf.Session() as sess:
+lwith tf.Session() as sess:
 
     # Run the initializer
     sess.run(init)

@@ -90,10 +90,11 @@ model.add(Dense(100, input_dim = train_x.shape[1], activation='relu'))
 model.add(Dropout(0.5))
 model.add(Dense(50, activation='relu'))
 model.add(Dropout(0.5))
-model.add(Dense(1))
+model.add(Dense(1, activation="sigmoid"))
 
-model.compile(loss='mean_squared_error',
-              optimizer='adam')
+model.compile(loss='mean_absolute
+_error',
+              optimizer='sgd')
 
 # estimator = KerasRegressor(build_fn=model, nb_epoch=100, batch_size=5, verbose=0)
 # estimator.fit(train_x, train_y)
@@ -106,7 +107,7 @@ model.fit(train_x, train_y, batch_size=16, epochs=250)
 print(model.summary())
 score = model.evaluate(test_x, test_y, batch_size=16)
 pred = model.predict(test_x)
-print(pred[:,0])
+print(pred)
 print("\nSCORE")
 print(score)
 print(pearson(test_y, pred))
