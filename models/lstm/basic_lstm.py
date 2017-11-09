@@ -3,60 +3,77 @@ import pandas as pd
 import tensorflow as tf
 from tensorflow.contrib import rnn
 from collections import defaultdict
+import re
+from random import randint
+
+
+strip_special_chars = re.compile("[^A-Za-z0-9 ]+")
+
+def cleanSentences(string):
+    string = string.lower().replace("<br />", " ")
+    return re.sub(strip_special_chars, "", string.lower())
 
 def read_files(train,test):
     train = pd.read_table(train, header=None)
     test = pd.read_table(test, header=None)
-
     train_x, train_y, test_x, test_y = train[1], train[3], test[1], test[3]
-
     return train_x, train_y, test_x, test_y
 
-def read_features(train, test):
-    train = pd.read_csv(train, header=None)
-    test = pd.read_csv(test, header=None)
 
-    return train.iloc[:,2:], test.iloc[:,2:]
+def get_embeddings(efile_name):
+    efile = open(efile_name, 'r')
+    first_400 = [x for x in range(0,400)]
+    embeddings = np.loadtxt(efile, dtype=float, usecols = first_400, skiprows= 1, delimiter = '\t')
+    efile.close()
+    efile = open(efile_name, 'r')
+    vocab = np.loadtxt(efile,  usecols = 400, dtype = np.unicode_, skiprows = 1, delimiter = '\t')
+    return embeddings, vocab
 
 def get_avg_sent_len(train_x):
     lens = 0
     for x in train_x:
         lens = lens + len(x.split())
-
     return int(lens/len(train_x))
 
-def integerize(train_x, test_x):
-    lex = defaultdict()
-    padding = get_avg_sent_len(train_x)
-    ints_train = np.zeros(shape = (len(train_x), padding))
-    ints_test = np.zeros(shape = (len(test_x), padding))
 
-    for n, tweet in enumerate(train_x):
-        ints = np.zeros((padding), dtype = "int32")
-        tweet = tweet.split()
-        for word in tweet:
-            if (tweet.index(word) + 1) > padding:
-                break
-            if lex.get(word.lower()) == None:
-               lex[word.lower()] = len(lex.keys())
-            ints[tweet.index(word)] = lex[word.lower()]
-        ints_train[n] = ints
+def vectorize(train_x, test_x, embeddings, vocab, maxSeqLength):
+    tweets_vec_train = np.zeros(shape=(len(train_x), maxSeqLength), dtype='int32')
+    tweets_vec_test = np.zeros(shape=(len(test_x), maxSeqLength), dtype='int32')
+    for no, tweet in enumerate(train_x):
+        wordIndex = 0
+        cleanedLine = cleanSentences(tweet)
+        split = cleanedLine.split()
+        for word in split:
+           try:
+               tweets_vec_train[no][wordIndex] = embeddings[np.where(vocab==word)]
+           except ValueError:
+               tweets_vec_train[no][wordIndex] = embeddings[np.where(vocab=='<unk>')] #Vector for unkown words
+           wordIndex = wordIndex + 1
+           if wordIndex >= maxSeqLength:
+               break
+    for no, tweet in enumerate(test_x):
+        wordIndex = 0
+        cleanedLine = cleanSentences(tweet)
+        split = cleanedLine.split()
+        for word in split:
+           try:
+               tweets_vec_test[no][wordIndex] = embeddings[np.where(vocab==word)]
+           except ValueError:
+               tweets_vec_test[no][wordIndex] = embeddings[np.where(vocab=='<unk>')] #Vector for unkown words
+           wordIndex = wordIndex + 1
+           if wordIndex >= maxSeqLength:
+               break
+    return tweets_vec_train, tweets_vec_test
 
-    for n, tweet in enumerate(test_x):
-        ints = np.zeros((padding), dtype="int32")
-        tweet = tweet.split()
-        for word in tweet:
-            if (tweet.index(word) + 1) > padding:
-                break
-            try:
-                ints[tweet.index(word)] = lex[word.lower()]
-            except KeyError:
-                ints[tweet.index(word)] = len(set(lex.keys()))
-        ints_test[n] = ints
 
-    return ints_train, ints_test, lex
+def to_tensor(tweets_vec_train, train_y):
+    tweets_vec_train = tf.constant(tweets_vec_train, dtype=tf.float32)  # X is a np.array
+    train_y = tf.constant(train_y, dtype=tf.string)  # y is a np.array
+    return tweets_vec_train, train_y
 
-def generate_batches(x, y, batch_size, num_epochs=None):
+
+def generate_batches(tweets_vec_train, train_y, batch_size, num_epochs=None):
+    x,y = to_tensor(tweets_vec_train, train_y)
     min_after_dequeue = 200
     capacity = min_after_dequeue + 3 * batch_size
     feature_batch, label_batch = tf.train.shuffle_batch([x, y], 
@@ -89,22 +106,40 @@ train_file = "../../data/EI-reg-English-Train/EI-reg-en_anger_train.txt"
 test_file = "../../data/dev/EI-reg-En-anger-dev.txt"
 train_feature_file= "EI-reg-En-anger-train.vectors.without.random.train.csv"
 test_feature_file= "EI-reg-En-anger-train.vectors.without.random.test.csv"
+efile_name = "/data/s3094723/embeddings/w2v.twitter.edinburgh10M.400d.csv"
 
 train_x, train_y, test_x, test_y = read_files(train_file, test_file)
 train_x, train_y, lex = integerize(train_x, test_x)
 train_features, test_features = read_features(train_feature_file, test_feature_file)
 
+
 learning_rate = 0.001
 training_epochs = 100
 batch_size = 128
-display_step = 200
+display_step = 20
+embedding_dim = 400
 
-padding = train_x.shape[0]
-#timesteps = 43
-timesteps = 1
+maxSeqLenght = get_avg_sent_len(train_x)
+padding = train_x.shape[0] #??
+timesteps = 1 #??
 num_hidden = 128 
 num_classes = 1 
-total_samples = train_x.shape[0]
+total_samples = train_x.shape[0] #??
+
+
+# #load embeddings
+# embeddings, vocab, vocab_size = get_embeddings(efile_name)
+#
+# W = tf.Variable(tf.constant(0.0, shape=[vocab_size, embedding_dim]),
+#                    trainable=False, name="W")
+# V = tf.Variable(tf.constant('', shape=[vocab_size]),
+#                    trainable=False, name="V", dtype =tf.string )
+# embedding_placeholder = tf.placeholder(tf.float32, [vocab_size, embedding_dim])
+# vocab_placeholder = tf.placeholder(tf.string, [vocab_size])
+# embedding_init = W.assign(embedding_placeholder)
+# vocab_init = V.assign(vocab_placeholder)
+# #sess.run([embedding_init, vocab_init], feed_dict={embedding_placeholder: embeddings, vocab_placeholder: vocab})
+
 
 X = tf.placeholder("float", [None, padding, timesteps])
 Y = tf.placeholder("float", [None, num_classes])
@@ -116,21 +151,21 @@ biases = {
     'out': tf.Variable(tf.random_normal([num_classes]))
 }
 
-logits = RNN(X, weights, biases)
-prediction = tf.nn.softmax(logits)
+output = RNN(X, weights, biases)
+prediction = tf.nn.softmax(output)
 
 # Define loss and optimizer
-loss_op = tf.reduce_mean(tf.losses.mean_squared_error(Y, logits))
+loss_op = tf.reduce_mean(tf.losses.mean_squared_error(Y, output))
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate, epsilon = 1e-09)
 train_op = optimizer.minimize(loss_op)
 
 #Evaluate model
-pearson = tf.contrib.metrics.streaming_pearson_correlation(logits, Y, name="pearson")
+pearson = tf.contrib.metrics.streaming_pearson_correlation(output, Y, name="pearson")
 
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
 
-lwith tf.Session() as sess:
+with tf.Session() as sess:
 
     # Run the initializer
     sess.run(init)
