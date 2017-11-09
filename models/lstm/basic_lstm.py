@@ -66,10 +66,10 @@ def vectorize(train_x, test_x, embeddings, vocab, maxSeqLength):
     return tweets_vec_train, tweets_vec_test
 
 
-def to_tensor(tweets_vec_train, train_y):
-    tweets_vec_train = tf.constant(tweets_vec_train, dtype=tf.float32)  # X is a np.array
-    train_y = tf.constant(train_y, dtype=tf.string)  # y is a np.array
-    return tweets_vec_train, train_y
+def to_tensor(tweets_vec, labels):
+    tweets_vec = tf.constant(tweets_vec, dtype=tf.float32)  # X is a np.array
+    labels = tf.constant(train_y, dtype=tf.string)  # y is a np.array
+    return tweets_vec, labels
 
 
 def generate_batches(tweets_vec_train, train_y, batch_size, num_epochs=None):
