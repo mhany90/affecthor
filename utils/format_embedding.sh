@@ -1,6 +1,6 @@
 #!/bin/bash
 # this scripts formats embedding files such that:
-#   numerical values are separated by spaces
+#   numerical values are separated by tabs
 #   words appear at the end of the corresponding line
 
 # input file
@@ -18,10 +18,10 @@ fi
 # reorder and rewrite to the output file
 awk -v awk_ws=$wstart '{
   if ( awk_ws ) {
-    for (i=2; i<=NF; i++) printf $i " "; print $1
+    for (i=2; i<=NF; i++) printf $i "\t"; print $1
   }
   else {
-    for (i=1; i<NF; i++) printf $i " "; print $NF
+    for (i=1; i<NF; i++) printf $i "\t"; print $NF
   }
 }' $IFILE > $OFILE
 
