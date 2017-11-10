@@ -29,6 +29,9 @@ TOOLDIR=$PWD/tools
 # models directory
 MODELDIR=$PWD/models
 
+# utils directory
+UTILSDIR=$PWD/utils
+
 
 # ensure script runs from the root directory
 if ! [ -x "$PWD/setup.sh" ]; then
