@@ -109,8 +109,7 @@ test_feature_file= "EI-reg-En-anger-train.vectors.without.random.test.csv"
 efile_name = "/data/s3094723/embeddings/w2v.twitter.edinburgh10M.400d.csv"
 
 train_x, train_y, test_x, test_y = read_files(train_file, test_file)
-train_x, train_y, lex = integerize(train_x, test_x)
-train_features, test_features = read_features(train_feature_file, test_feature_file)
+train_x, test_x = vectorize(train_x, test_x)
 
 
 learning_rate = 0.001
@@ -124,24 +123,10 @@ padding = maxSeqLenght
 timesteps = maxSeqLenght
 num_hidden = 128 
 num_classes = 1 
-total_samples = train_x.shape[0] #??
+total_samples = train_x.shape[0]
 
 
-# #load embeddings
-# embeddings, vocab, vocab_size = get_embeddings(efile_name)
-#
-# W = tf.Variable(tf.constant(0.0, shape=[vocab_size, embedding_dim]),
-#                    trainable=False, name="W")
-# V = tf.Variable(tf.constant('', shape=[vocab_size]),
-#                    trainable=False, name="V", dtype =tf.string )
-# embedding_placeholder = tf.placeholder(tf.float32, [vocab_size, embedding_dim])
-# vocab_placeholder = tf.placeholder(tf.string, [vocab_size])
-# embedding_init = W.assign(embedding_placeholder)
-# vocab_init = V.assign(vocab_placeholder)
-# #sess.run([embedding_init, vocab_init], feed_dict={embedding_placeholder: embeddings, vocab_placeholder: vocab})
-
-
-X = tf.placeholder("float", [None, padding, timesteps])
+X = tf.placeholder("float", [None, timesteps])
 Y = tf.placeholder("float", [None, num_classes])
 
 weights = {
