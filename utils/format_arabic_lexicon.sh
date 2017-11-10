@@ -49,6 +49,7 @@ elif [ "$lexfile" = "NRC-HS-unigrams-pmilexicon_ar.txt" ] || [ "$lexfile" = "S14
     field_ar=2
     field_em=3
     data_start=32
+fi
 
 # extract and output
 awk -v awk_ar=$field_ar -v awk_em=$field_em -v awk_s=$data_start -F $field_sep '{
