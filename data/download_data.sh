@@ -93,11 +93,6 @@ for (( t=0; t<4; t++ )); do
 
         # EI-oc task
         if [ $t -eq 1 ]; then
-            # ignore unavailable languages
-            if [ $l -ne 0 ]; then
-                continue
-            fi
-
             # irregular URL in (EI-oc, En, train)
             if [ $l -eq 0 ]; then
                 TRAIN_URL="${URL_PREFIX}/$task/$lang/$task-$code-train.zip"
@@ -128,11 +123,6 @@ for (( t=0; t<4; t++ )); do
 
         # V-reg task
         if [ $t -eq 2 ]; then
-            # ignore unavailable languages
-            if [ $l -eq 2 ]; then
-                continue
-            fi
-
             # irregular URL in (V-reg, En, train) and (V-reg, En, dev)
             if [ $l -eq 0 ]; then
                 TRAIN_URL="${LOCAL_URL}/${LOCAL_FILE}-training.txt.zip"
@@ -164,15 +154,16 @@ for (( t=0; t<4; t++ )); do
 
         # V-oc task
         if [ $t -eq 3 ]; then
-            # ignore unavailable languages
-            if [ $l -ne 0 ]; then
-                continue
-            fi
-
             # irregular URL in (V-oc, En, train) and (V-oc, En, dev)
             LOCAL_URL="${URL_PREFIX}/VAD-oc/$lang"
             TRAIN_URL="${LOCAL_URL}/${LOCAL_FILE}-train.zip"
             DEV_URL="${LOCAL_URL}/${LOCAL_FILE}-dev.zip"
+
+            # Spanish data has a different name
+            if [ $l -eq 2 ]; then
+               TRAIN_URL="${LOCAL_URL}/${LOCAL_FILE}-train.txt.zip"
+               DEV_URL="${LOCAL_URL}/${LOCAL_FILE}-dev.txt.zip"
+            fi
 
             # download and extract
             wget -q "${TRAIN_URL}"
@@ -180,6 +171,7 @@ for (( t=0; t<4; t++ )); do
             unzip "*.zip"
 
             # clean irrelevant files
+            rm -rf "__MACOSX"
             find . -type f -name '*.zip' -delete
 
             # rename files using our convention
