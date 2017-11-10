@@ -120,8 +120,8 @@ display_step = 20
 embedding_dim = 400
 
 maxSeqLenght = get_avg_sent_len(train_x)
-padding = train_x.shape[0] #??
-timesteps = 1 #??
+padding = maxSeqLenght
+timesteps = maxSeqLenght
 num_hidden = 128 
 num_classes = 1 
 total_samples = train_x.shape[0] #??
@@ -152,10 +152,10 @@ biases = {
 }
 
 output = RNN(X, weights, biases)
-prediction = tf.nn.softmax(output)
+prediction = tf.nn.sigmoid(output)
 
 # Define loss and optimizer
-loss_op = tf.reduce_mean(tf.losses.mean_squared_error(Y, output))
+loss_op = tf.reduce_mean(tf.losses.mean_squared_error(Y, prediction))
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate, epsilon = 1e-09)
 train_op = optimizer.minimize(loss_op)
 
