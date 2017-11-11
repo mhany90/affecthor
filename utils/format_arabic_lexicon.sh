@@ -23,32 +23,36 @@ data_start=0
 field_sep="[\t]"
 
 # determine values according to the file format
-if [ "$lexfile" = "Arabic_Emoticon_Lexicon.txt" ] || [ "$lexfile" = "Arabic_Hashtag_Lexicon_dialectal.txt" ] || \
-       [ "$lexfile" = "Arabic_Hashtag_Lexicon.txt" ]; then
+if [ "$lexfile" = "Arabic_Emoticon_Lexicon.txt" ]; then
     field_ar=1
     field_em=3
-    data_start=105
+    data_start=106
+
+elif [ "$lexfile" = "Arabic_Hashtag_Lexicon_dialectal.txt" ] || [ "$lexfile" = "Arabic_Hashtag_Lexicon.txt" ]; then
+    field_ar=1
+    field_em=3
+    data_start=107
 
 elif [ "$lexfile" = "bingliu_ar.txt" ]; then
     field_ar=2
     field_em=4
-    data_start=87
+    data_start=88
 
 elif [ "$lexfile" = "MPQA_ar.txt" ]; then
     field_ar=14
     field_em=12
-    data_start=40
+    data_start=83
     field_sep="[[[:space:]=]"
 
 elif [ "$lexfile" = "nrc_emotion_ar.txt" ]; then
     field_ar=4
     field_em=3
-    data_start=39
+    data_start=86
 
 elif [ "$lexfile" = "NRC-HS-unigrams-pmilexicon_ar.txt" ] || [ "$lexfile" = "S140-unigrams-pmilexicon_ar.txt" ]; then
     field_ar=2
     field_em=3
-    data_start=32
+    data_start=91
 fi
 
 # extract and output
