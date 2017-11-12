@@ -29,8 +29,8 @@ echo '[INFO] Downloading data...'
 . $DATADIR/download_data.sh
 echo '[INFO] Data has been downloaded'
 
-
 # clean unvalid words from the data
 echo '[INFO] Cleaning data...'
 . $DATADIR/clean_data.sh
 echo '[INFO] Data has been cleaned'
+

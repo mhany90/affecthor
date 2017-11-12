@@ -5,12 +5,19 @@
 # resume training with option --stage N
 stage=0
 
+# install all tools again with option --install-tools
+newtools=0
+
+# download data again with option --fetch-data
+newdata=0
+
 # set bash to 'debug' mode, it will exit on :
 # -e 'error', -u 'undefined variable', -o ... 'error in pipeline', -x 'print commands'
 set -e
 set -u
 set -o pipefail
 #set -x
+
 
 # define directory locations
 
@@ -44,6 +51,8 @@ for arg in "$@"; do
     shift
     case "$arg" in
         "--stage") set -- "$@" "-s" ;;
+        "--fetch-data") set -- "$@" "-d" ;;
+        "--install-tools") set -- "$@" "-t" ;;
         *) set -- "$@" "$arg"
     esac
 done
@@ -53,6 +62,8 @@ do
     case "${option}"
     in
         s) stage=${OPTARG};;
+        d) newdata=1;;
+        t) newtools=1;;
     esac
 done
 
