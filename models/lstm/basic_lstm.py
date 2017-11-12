@@ -5,7 +5,7 @@ from tensorflow.contrib import rnn
 from collections import defaultdict
 import re
 from random import randint
-
+from scipy.stats.stats import pearsonr
 
 strip_special_chars = re.compile("[^A-Za-z0-9 ]+")
 
@@ -102,7 +102,7 @@ def RNN(x, weights, biases):
 
     # Define a lstm cell with tensorflow
     lstm_cell = rnn.BasicLSTMCell(num_hidden, forget_bias=1.0)
-
+   
     # Get lstm cell output
     outputs, states = rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
 
@@ -113,16 +113,17 @@ train_file = "EI-reg-En-anger-train.txt"
 test_file = "EI-reg-En-anger-dev.txt"
 efile_name = "/data/s3094723/embeddings/en/w2v.twitter.edinburgh10M.400d.csv"
 train_x, train_y, test_x, test_y = read_files(train_file, test_file)
-
+test_y = test_y.values
+print(test_y.shape)
 learning_rate = 0.001
-training_epochs = 5
-batch_size = 1
+training_epochs = 40
+batch_size = 8
 display_step = 1
 embedding_dim = 400
 
 maxSeqLength = get_avg_sent_len(train_x)
 timesteps = maxSeqLength
-num_hidden = 128 
+num_hidden = 256 
 num_classes = 1 
 total_samples = train_x.shape[0]
 
@@ -191,16 +192,23 @@ with tf.Session() as sess:
     print("Optimization Finished!")
     coord.request_stop()
     coord.join(threads)
+    all_scores = []     
+    no_of_sub_arrays = len(test_y)/batch_size
+    test_x_sub = np.split(test_x, no_of_sub_arrays)
+    test_y_sub = np.split(test_y, no_of_sub_arrays)
+    for i,j in zip(test_x_sub,test_y_sub):
+        x = tf.convert_to_tensor(i)   
+        y = tf.convert_to_tensor(j)
+        test_x_1, test_y_1 = sess.run([x, y])
+      #  print(test_y_1)
+        test_y_1 = np.reshape(test_y_1, (batch_size, 1))
+        test_x_1 = np.reshape(test_x_1, (batch_size, 16))
+        score = sess.run(prediction, feed_dict = {X: test_x_1})
+     #   print(score, test_y_1)
+        score = score.tolist()
+        all_scores.extend(score)
 
-    x = tf.convert_to_tensor(test_x, dtype=tf.float32)   
-    y = tf.convert_to_tensor(test_y, dtype=tf.float32)
-    test_x, test_y = sess.run([x, y])
-    #print(test_y)
-    test_y = np.reshape(test_y, (-1, 1))
-    test_x = np.reshape(test_x, (-1, 16))
-
-    scores = sess.run(prediction, feed_dict = {X: test_x})
-    for x,y in zip(scores, test_y):
-         print(x, y)
-    corr = pearsonr(scores, test_y)
+    all_scores = [item for sublist in all_scores for item in sublist]
+    print(all_scores, test_y) 
+    corr = pearsonr(all_scores, test_y)
     print(corr[0])
