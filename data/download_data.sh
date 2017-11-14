@@ -9,6 +9,9 @@ for (( t=0; t<4; t++ )); do
 
     # rewrite the corresponding directory for each task
     TDIR="$DATADIR/$task"
+    if [ -d "$TDIR" ] && [ $newdata -eq 0 ]; then
+        continue
+    fi
     rm -rf $TDIR
     mkdir -p $TDIR
 

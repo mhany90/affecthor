@@ -1,27 +1,29 @@
 #!/usr/bin/python3
+# this script deletes and replaces certain special characters and words
 
 import re
+import sys
 import string
 from nltk.corpus import stopwords
 
-# this is work in progress, will update soon
-exit
+# source data file
+ifile = sys.argv[1]
 
-''' remove emoji
+# language of the source data file
+lang = sys.argv[2]
+
+# output data file
+ofile = sys.argv[3]
 
 
-import re
+with open(ifile, 'r') as fin:
+    with open(ofile, 'w') as fout:
 
-text = u'This dog \U0001f602'
-print(text) # with emoji
-
-emoji_pattern = re.compile("["
-        u"\U0001F600-\U0001F64F"  # emoticons
-        u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-        u"\U0001F680-\U0001F6FF"  # transport & map symbols
-        u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
-"]+", flags=re.UNICODE)
-print(emoji_pattern.sub(r'', text)) # no emoji
-
-'''
-
+        # delete quotation marks in Arabic
+        # weka returns an error otherwise
+        if lang == 'Ar':
+            for line in [y.replace('"', '') for y in fin.readlines()]:
+                fout.write(line)
+        else:
+            for line in fin.readlines():
+                fout.write(line)
