@@ -5,7 +5,7 @@
 # Arabic valence lexicons
 ARLEXDIR=$SENTLEXDIR/${CODES[1]}
 
-if [ ! -d "$ARLEXDIR" ] && [ $newdata -eq 1 ] ; then
+if [ ! -d "$ARLEXDIR" ] || [ $newdata -eq 1 ] ; then
     rm -rf $ARLEXDIR
     mkdir -p $ARLEXDIR
     pushd $ARLEXDIR
@@ -35,7 +35,7 @@ fi
 # Spanish valence lexicons
 ESLEXDIR=$SENTLEXDIR/${CODES[2]}
 
-if [ ! -d "$ESLEXDIR" ] && [ $newdata -eq 1 ] ; then
+if [ ! -d "$ESLEXDIR" ] || [ $newdata -eq 1 ] ; then
     rm -rf $ESLEXDIR
     mkdir -p $ESLEXDIR
     pushd $ESLEXDIR

@@ -27,3 +27,4 @@ with open(ifile, 'r') as fin:
         else:
             for line in fin.readlines():
                 fout.write(line)
+                
