@@ -3,7 +3,7 @@
 
 
 # resume training with option --stage N
-stage=0
+stage=2
 
 # install all tools again with option --install-tools
 newtools=0
@@ -16,7 +16,7 @@ newdata=0
 set -e
 set -u
 set -o pipefail
-#set -x
+set -x
 
 
 # define directory locations
@@ -86,8 +86,8 @@ fi
 
 ## STAGE 2 - apply weka filters
 if [ $stage -le 2 ]; then
-    echo '[INFO] Applying weka filters...'
-    #. $DATADIR/filter_features.sh
-    echo '[INFO] Finished selecting features'
+    echo '[INFO] Applying feature filters...'
+    . $DATADIR/filter_features.sh
+    echo '[INFO] Finished feature filtering'
 fi
 

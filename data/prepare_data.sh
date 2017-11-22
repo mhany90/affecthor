@@ -26,15 +26,18 @@ AFFECTS=("anger" "fear" "joy" "sadness")
 # sentiment lexicon directory
 SENTLEXDIR=$DATADIR/lexicon
 
+# weka directory
+WEKADIR="$TOOLDIR/weka-3-9-1"
+
 
 # download data and normalise naming
 echo '[INFO] Downloading SemEval-2018 data...'
-. $DATADIR/download_data.sh
+#. $DATADIR/download_data.sh
 echo '[INFO] Data has been downloaded'
 
 # clean unvalid words from the data
 echo '[INFO] Cleaning SemEval-2018 data...'
-. $DATADIR/clean_data.sh
+#. $DATADIR/clean_data.sh
 echo '[INFO] Data has been cleaned'
 
 # dowload and format Arabic sentiment lexicons

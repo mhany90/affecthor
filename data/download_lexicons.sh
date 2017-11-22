@@ -9,7 +9,6 @@ if [ ! -d "$ARLEXDIR" ] || [ $newdata -eq 1 ] ; then
     rm -rf $ARLEXDIR
     mkdir -p $ARLEXDIR
     pushd $ARLEXDIR
-
     wget -q "http://saifmohammad.com/WebDocs/Arabic%20Lexicons/Arabic_Emoticon_Lexicon.txt"
     wget -q "http://saifmohammad.com/WebDocs/Arabic%20Lexicons/Arabic_Hashtag_Lexicon.txt"
     wget -q "http://saifmohammad.com/WebDocs/Arabic%20Lexicons/Arabic_Hashtag_Lexicon_dialectal.txt"
@@ -18,24 +17,33 @@ if [ ! -d "$ARLEXDIR" ] || [ $newdata -eq 1 ] ; then
     wget -q "http://saifmohammad.com/WebDocs/Arabic%20Lexicons/nrc_emotion_ar.txt"
     wget -q "http://saifmohammad.com/WebDocs/Arabic%20Lexicons/S140-unigrams-pmilexicon_ar.txt"
     wget -q "http://saifmohammad.com/WebDocs/Arabic%20Lexicons/NRC-HS-unigrams-pmilexicon_ar.txt"
-
     popd
+
+    # filter entries that do not concern us from lexicons
+    grep "$(printf '\t')positive$(printf '\t')1\|$(printf '\t')negative$(printf '\t')1" \
+         ${ARLEXDIR}/nrc_emotion_ar.txt > ${ARLEXDIR}/nrc_emotion.txt
+    rm -f ${ARLEXDIR}/nrc_emotion_ar.txt
 
     echo '[INFO] Cleaning Arabic lexicons...'
     for filepath in ${ARLEXDIR}/*.txt; do
         filename=$(basename $filepath)
         filename="${filename%.*}"
 
-        . ${UTILSDIR}/format_arabic_lexicon.sh $filepath ${ARLEXDIR}/$filename.clean
+        . ${UTILSDIR}/format_arabic_lexicon.sh $filepath ${ARLEXDIR}/$filename.format
+        python3 ${UTILSDIR}/clean_file.py ${ARLEXDIR}/$filename.format 'Ar' ${ARLEXDIR}/$filename.csv
+        pushd ${WEKADIR}
+        . ${UTILSDIR}/csv2arff.sh ${ARLEXDIR}/$filename.csv ${ARLEXDIR}/$filename.arff "\t"
+        popd
         rm -f $filepath
+        rm -f ${ARLEXDIR}/$filename.format
+        rm -f ${ARLEXDIR}/$filename.csv
     done
 fi
-
 
 # Spanish valence lexicons
 ESLEXDIR=$SENTLEXDIR/${CODES[2]}
 
-if [ ! -d "$ESLEXDIR" ] || [ $newdata -eq 1 ] ; then
+if [ ! -d "$ESLEXDIR" ] || [ $newdata -eq 1 ]; then
     rm -rf $ESLEXDIR
     mkdir -p $ESLEXDIR
     pushd $ESLEXDIR
@@ -101,8 +109,14 @@ if [ ! -d "$ESLEXDIR" ] || [ $newdata -eq 1 ] ; then
         filename=$(basename $filepath)
         filename="${filename%.*}"
 
-        python3 ${UTILSDIR}/format_spanish_lexicon.py $filepath ${ESLEXDIR}/$filename.clean
+        python3 ${UTILSDIR}/format_spanish_lexicon.py $filepath ${ESLEXDIR}/$filename.format
+        python3 ${UTILSDIR}/clean_file.py ${ESLEXDIR}/$filename.format 'Es' ${ESLEXDIR}/$filename.csv
+        pushd ${WEKADIR}
+        . ${UTILSDIR}/csv2arff.sh ${ESLEXDIR}/$filename.csv ${ESLEXDIR}/$filename.arff "\t"
+        popd
         rm -f $filepath
+        rm -f ${ESLEXDIR}/$filename.format
+        rm -f ${ESLEXDIR}/$filename.csv
     done
 fi
 

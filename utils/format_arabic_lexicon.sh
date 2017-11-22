@@ -26,17 +26,17 @@ field_sep="[\t]"
 if [ "$lexfile" = "Arabic_Emoticon_Lexicon.txt" ]; then
     field_ar=1
     field_em=3
-    data_start=106
+    data_start=105
 
 elif [ "$lexfile" = "Arabic_Hashtag_Lexicon_dialectal.txt" ] || [ "$lexfile" = "Arabic_Hashtag_Lexicon.txt" ]; then
     field_ar=1
     field_em=3
-    data_start=107
+    data_start=106
 
 elif [ "$lexfile" = "bingliu_ar.txt" ]; then
     field_ar=2
     field_em=4
-    data_start=88
+    data_start=87
 
 elif [ "$lexfile" = "MPQA_ar.txt" ]; then
     field_ar=14
@@ -44,15 +44,15 @@ elif [ "$lexfile" = "MPQA_ar.txt" ]; then
     data_start=83
     field_sep="[[[:space:]=]"
 
-elif [ "$lexfile" = "nrc_emotion_ar.txt" ]; then
+elif [ "$lexfile" = "nrc_emotion.txt" ]; then
     field_ar=4
-    field_em=3
-    data_start=86
+    field_em=2
+    data_start=1
 
 elif [ "$lexfile" = "NRC-HS-unigrams-pmilexicon_ar.txt" ] || [ "$lexfile" = "S140-unigrams-pmilexicon_ar.txt" ]; then
     field_ar=2
     field_em=3
-    data_start=91
+    data_start=90
 fi
 
 # extract and output
@@ -63,4 +63,19 @@ awk -v awk_ar=$field_ar -v awk_em=$field_em -v awk_s=$data_start -F $field_sep '
 		}
 	}
 }' $IFILE > $OFILE
+
+# extra formatting steps for bad shaped lexicons...
+if [ "$lexfile" = "MPQA_ar.txt" ]; then
+    grep "$(printf '\t')positive\|$(printf '\t')negative\|$(printf '\t')neutral\|$(printf '\t')both" $OFILE > $OFILE.clean
+    sed -i '1s/^/[ar]\t[priorpolarity]\n/' $OFILE.clean
+    rm -f $OFILE
+    mv $OFILE.clean $OFILE
+    rm -f $OFILE.clean
+elif [ "$lexfile" = "nrc_emotion.txt" ]; then
+    sort $OFILE | uniq > $OFILE.clean
+    sed -i '1s/^/[Arabic translation]\t[Emotion Indicator]\n/' $OFILE.clean
+    rm -f $OFILE
+    mv $OFILE.clean $OFILE
+    rm -f $OFILE.clean
+fi
 

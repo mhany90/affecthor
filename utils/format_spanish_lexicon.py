@@ -18,7 +18,8 @@ with open(ofile, 'w') as fout:
         tree = ET.parse(ifile)
         root = tree.getroot()
         for lemma in root.iter('lemma'):
-            fout.write(lemma.text.strip() + '\t' + str(lemma.attrib['pol']) + '\n')
+            if lemma.text.strip().isalpha():
+                fout.write(lemma.text.strip() + '\t' + str(lemma.attrib['pol']) + '\n')
 
     # assume other lexicons are already in the correct format
     else:
