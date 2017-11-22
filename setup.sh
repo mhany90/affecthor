@@ -83,3 +83,11 @@ if [ $stage -le 1 ]; then
     echo '[INFO] Finished preparing data'
 fi
 
+
+## STAGE 2 - apply weka filters
+if [ $stage -le 2 ]; then
+    echo '[INFO] Applying weka filters...'
+    #. $DATADIR/filter_features.sh
+    echo '[INFO] Finished selecting features'
+fi
+

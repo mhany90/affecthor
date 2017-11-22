@@ -20,14 +20,14 @@ for t in ${TASKS[@]}; do
 
                 if [ -f $datafile ]; then
                     # clean file
-                    python3 ${DATADIR}/clean_file.py $datafile $l "$datapath${basename}.clean"
+                    python3 ${UTILSDIR}/clean_file.py $datafile $l "$datapath${basename}.clean"
 
                     # convert to arff and remove numeric ids
                     # weka returns an error otherwise
                     python ${EMOINTDIR}/tweets_to_arff.py "$datapath${basename}.clean" $datafile.tmp
 
-                    cut -d ',' -f2- < $datafile.tmp > "$datafile${basename}.arff"
-                    sed -i '3d' "$datafile${basename}.arff"
+                    cut -d ',' -f2- < $datafile.tmp > "${datapath}${basename}.arff"
+                    sed -i '3d' "${datapath}${basename}.arff"
                     rm $datafile.tmp
                 fi
             done
