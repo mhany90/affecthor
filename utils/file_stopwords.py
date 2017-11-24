@@ -4,6 +4,7 @@
 # it assumes that the field of interest has been tokenized
 
 import sys
+import io
 import string
 
 # source data file
@@ -19,8 +20,8 @@ filter_field = int(sys.argv[3])
 ofile = sys.argv[4]
 
 
-with open(ifile, 'r') as fin:
-    with open(ofile, 'w') as fout:
+with io.open(ifile, 'r') as fin:
+    with io.open(ofile, 'w') as fout:
         for line in fin.readlines():
             ind = 0
             fields = line.split('\t')
@@ -36,7 +37,7 @@ with open(ifile, 'r') as fin:
 
                 # print separators
                 if ind < len(fields):
-                    fout.write('\t')
+                    fout.write(u'\t')
                 else:
-                    fout.write('')
+                    fout.write(u'')
 

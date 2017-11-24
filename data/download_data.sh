@@ -47,8 +47,8 @@ for (( t=0; t<4; t++ )); do
             fi
 
             # download and extract
-            wget "${TRAIN_URL}"
-            wget "${DEV_URL}"
+            wget -q "${TRAIN_URL}"
+            wget -q "${DEV_URL}"
             unzip "*.zip"
 
             # clean irrelevant files
@@ -72,8 +72,8 @@ for (( t=0; t<4; t++ )); do
         if [ $t -eq 2 ] || [ $t -eq 3 ]; then
 
             # download and extract
-            wget "${TRAIN_URL}"
-            wget "${DEV_URL}"
+            wget -q "${TRAIN_URL}"
+            wget -q "${DEV_URL}"
             unzip "*.zip"
 
             # clean irrelevant files

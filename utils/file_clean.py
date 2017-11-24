@@ -3,6 +3,7 @@
 # it is meant to be used before tokenization
 
 import re
+import io
 import sys
 import string
 
@@ -30,8 +31,8 @@ re_control = r'(\\[tnrfv])+'
 # matches other special characters such as emoticons
 re_emoticon = r'([^\w\s' + string.punctuation + r'])'
 
-with open(ifile, 'r') as fin:
-    with open(ofile, 'w') as fout:
+with io.open(ifile, 'r') as fin:
+    with io.open(ofile, 'w') as fout:
         for line in fin.readlines():
             ind = 0
             fields = line.split('\t')
@@ -81,7 +82,7 @@ with open(ifile, 'r') as fin:
 
                 # print separators
                 if ind < len(fields):
-                    fout.write('\t')
+                    fout.write(u'\t')
                 else:
-                    fout.write('')
+                    fout.write(u'')
 
