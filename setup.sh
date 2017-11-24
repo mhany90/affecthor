@@ -2,21 +2,25 @@
 # this is a general setup script for this project
 
 
-# resume training with option --stage N
-stage=2
+# resume training with option --stage N, -s N
+stage=0
 
-# install all tools again with option --install-tools
+# install all tools again with option --install-tools, -t
 newtools=0
 
-# download data again with option --fetch-data
+# download data again with option --fetch-data, -d
 newdata=0
+
+# apply weka filters again with option --weka-filters, -f
+newfilters=0
+
 
 # set bash to 'debug' mode, it will exit on :
 # -e 'error', -u 'undefined variable', -o ... 'error in pipeline', -x 'print commands'
 set -e
 set -u
 set -o pipefail
-set -x
+#set -x
 
 
 # define directory locations
@@ -53,6 +57,7 @@ for arg in "$@"; do
         "--stage") set -- "$@" "-s" ;;
         "--fetch-data") set -- "$@" "-d" ;;
         "--install-tools") set -- "$@" "-t" ;;
+        "--weka-filters") set -- "@" "-f" ;;
         *) set -- "$@" "$arg"
     esac
 done
@@ -64,6 +69,7 @@ do
         s) stage=${OPTARG};;
         d) newdata=1;;
         t) newtools=1;;
+        f) newfilters=1;;
     esac
 done
 
@@ -84,7 +90,7 @@ if [ $stage -le 1 ]; then
 fi
 
 
-## STAGE 2 - apply weka filters
+# STAGE 2 - apply weka filters
 if [ $stage -le 2 ]; then
     echo '[INFO] Applying feature filters...'
     . $DATADIR/filter_features.sh

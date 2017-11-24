@@ -1,14 +1,18 @@
 #!/bin/bash
 # this script downloads sentiment lexicons for Arabic and Spanish
 
+# TODO: Lexicons for Arabic and Spanish still need a lot of work. Disabled for now
+# This file needs to be fixed and extended
 
 # Arabic valence lexicons
 ARLEXDIR=$SENTLEXDIR/${CODES[1]}
+#rm -rf ${ARLEXDIR}
 
-if [ ! -d "$ARLEXDIR" ] || [ $newdata -eq 1 ] ; then
+if [ ! -d "$ARLEXDIR" ] || [ $newdata -eq 1 ]; then
     rm -rf $ARLEXDIR
     mkdir -p $ARLEXDIR
-    pushd $ARLEXDIR
+
+    pushd $ARLEXDIR > /dev/null
     wget -q "http://saifmohammad.com/WebDocs/Arabic%20Lexicons/Arabic_Emoticon_Lexicon.txt"
     wget -q "http://saifmohammad.com/WebDocs/Arabic%20Lexicons/Arabic_Hashtag_Lexicon.txt"
     wget -q "http://saifmohammad.com/WebDocs/Arabic%20Lexicons/Arabic_Hashtag_Lexicon_dialectal.txt"
@@ -17,28 +21,35 @@ if [ ! -d "$ARLEXDIR" ] || [ $newdata -eq 1 ] ; then
     wget -q "http://saifmohammad.com/WebDocs/Arabic%20Lexicons/nrc_emotion_ar.txt"
     wget -q "http://saifmohammad.com/WebDocs/Arabic%20Lexicons/S140-unigrams-pmilexicon_ar.txt"
     wget -q "http://saifmohammad.com/WebDocs/Arabic%20Lexicons/NRC-HS-unigrams-pmilexicon_ar.txt"
-    popd
+    popd > /dev/null
 
     # filter entries that do not concern us from lexicons
-    grep "$(printf '\t')positive$(printf '\t')1\|$(printf '\t')negative$(printf '\t')1" \
-         ${ARLEXDIR}/nrc_emotion_ar.txt > ${ARLEXDIR}/nrc_emotion.txt
-    rm -f ${ARLEXDIR}/nrc_emotion_ar.txt
+    #grep "$(printf '\t')positive$(printf '\t')1\|$(printf '\t')negative$(printf '\t')1" \
+    #     ${ARLEXDIR}/nrc_emotion_ar.txt > ${ARLEXDIR}/nrc_emotion.txt
+    #rm -f ${ARLEXDIR}/nrc_emotion_ar.txt
 
     echo '[INFO] Cleaning Arabic lexicons...'
     for filepath in ${ARLEXDIR}/*.txt; do
         filename=$(basename $filepath)
         filename="${filename%.*}"
 
+        # format and extract the useful fields
         . ${UTILSDIR}/format_arabic_lexicon.sh $filepath ${ARLEXDIR}/$filename.format
-        python3 ${UTILSDIR}/clean_file.py ${ARLEXDIR}/$filename.format 'Ar' ${ARLEXDIR}/$filename.csv
-        pushd ${WEKADIR}
+
+        # clean lexicon
+        python3 ${UTILSDIR}/file_clean.py ${ARLEXDIR}/$filename.format 'Ar' 1 ${ARLEXDIR}/$filename.csv
+
+        # convert to arff format
+        pushd ${WEKADIR} > /dev/null
         . ${UTILSDIR}/csv2arff.sh ${ARLEXDIR}/$filename.csv ${ARLEXDIR}/$filename.arff "\t"
-        popd
-        rm -f $filepath
-        rm -f ${ARLEXDIR}/$filename.format
-        rm -f ${ARLEXDIR}/$filename.csv
+        popd > /dev/null
+
+        #rm -f $filepath
+        #rm -f ${ARLEXDIR}/$filename.format
+        #rm -f ${ARLEXDIR}/$filename.csv
     done
 fi
+exit
 
 # Spanish valence lexicons
 ESLEXDIR=$SENTLEXDIR/${CODES[2]}

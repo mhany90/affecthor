@@ -17,18 +17,31 @@ AFFECTS=("anger" "fear" "joy" "sadness")
 # weka directory
 WEKADIR="$TOOLDIR/weka-3-9-1"
 
-
 # directories where to find embeddings (@peregrine.hpc.rug.nl)
 EMBHOME_EN="/data/s3094723/embeddings/en"
-#EMBHOME_AR="/data/s3094723/embeddings/en"
-#EMBHOME_ES="/data/s3094723/embeddings/en"
-# word embeddings to apply
-#EMB_EN = ("w2v.twitter.edinburgh10M.400d.csv" "Googlenews_emb.reformatted.csv" "glove.twitter.27B.200d.reformated.txt" "400M/w2v.400M.reformated.csv")
-#EMB_EN_EXT = ("ed" "ggl" "gloveT" "400m")
+EMBHOME_AR="/data/s3094723/embeddings/ar"
+EMBHOME_ES="/data/s3094723/embeddings/es"
+
+# word embeddings to apply (English)
+EMB_EN=("w2v.twitter.edinburgh10M.400d.csv.gz" "Googlenews_emb.reformatted.csv.gz"
+        "glove.twitter.27B.200d.reformated.txt.gz" "400M/w2v.400M.reformated.csv.gz")
+EMB_EN_EXT=("ed" "ggl" "glvt" "400m")
+
+# word embeddings to apply (Arabic)
+EMB_AR=()
+EMB_AR_EXT=()
+
+# word embeddings to apply (Spanish)
+EMB_ES=()
+EMB_ES_EXT=()
 
 
-EMBHOME_EN="/home/joan"
+################################################ EASY SETTINGS THAT WORK FOR NOW...
+TASKS=("EI-reg")
 EMB_EN=("w2v.twitter.edinburgh10M.400d.csv.gz")
+EMB_EN_EXT=("ed")
+################################################
+
 
 # iterate over tasks
 for t in ${TASKS[@]}; do
@@ -40,52 +53,73 @@ for t in ${TASKS[@]}; do
         fi
         for a in ${TAFFECTS[@]}; do
             for s in ${SETS[@]}; do
-                basename="$DATADIR/$t/$l/$s/$t-$l-$a-$s"
-                extension="arff"
-                datafile="${basename}.${extension}"
 
-                if [ -f $datafile ]; then
-                    pushd $WEKADIR
+                inbase="$DATADIR/$t/$l/$s/$t-$l-$a-$s"
+                inext="arff"
+                infile="${inbase}.${inext}"
+
+                outbase="$DATADIR/$t/$l/$s/features/$t-$l-$a-$s"
+                mkdir -p "$DATADIR/$t/$l/$s/features"
+
+                if [ -f $infile ]; then
+                    pushd $WEKADIR > /dev/null
+
 
                     if [ $l == "En" ]; then
-
                         # apply lexical filter for English
-                        #. ${UTILSDIR}/filter_lex.sh $datafile $basename.lex.arff
-                        #. ${UTILSDIR}/filter_remove.sh $basename.lex.arff $basename.lex.remove.arff 1
-                        #. ${UTILSDIR}/arff2csv.sh $basename.lex.remove.arff $basename.lex.remove.csv ","
+                        if [ ! -f $outbase.lex.csv ] || [ $newfilters -eq 1 ]; then
+                            echo "[INFO] Lexical filter -> $(basename $infile)"
+                            . ${UTILSDIR}/filter_lex.sh $infile $inbase.lex.arff
+                            . ${UTILSDIR}/filter_remove.sh $inbase.lex.arff $inbase.lex.remove.arff 1
+                            . ${UTILSDIR}/arff2csv.sh $inbase.lex.remove.arff $outbase.lex.csv ","
+                            rm -f $inbase.lex.arff
+                            rm -f $inbase.lex.remove.arff
+                        fi
 
-                        # apply embeddings filter for English
-                        for wemb in ${EMB_EN[@]}; do
+                        # apply embeddings and combined filters for English
+                        for (( e=0; e<4; e++ )); do
+                            wemb=${EMB_EN[$e]}
+                            wembext=${EMB_EN_EXT[$e]}
                             embfile="${EMBHOME_EN}/${wemb}"
 
-                            #. ${UTILSDIR}/filter_emb.sh $datafile $basename.emb.arff $embfile 15
-                            #. ${UTILSDIR}/filter_remove.sh $basename.emb.arff $basename.emb.remove.arff 1
-                            #. ${UTILSDIR}/arff2csv.sh $basename.emb.remove.arff $basename.emb.remove.csv ","
+                            if [ ! -f $outbase.emb.$wembext.csv ] || [ $newfilters -eq 1 ]; then
+                                echo "[INFO] Embedding filter ($wembext) -> $(basename $infile)"
+                                . ${UTILSDIR}/filter_emb.sh $infile $inbase.emb.$wembext.arff $embfile 25
+                                . ${UTILSDIR}/filter_remove.sh $inbase.emb.$wembext.arff $inbase.emb.$wembext.remove.arff 1
+                                . ${UTILSDIR}/arff2csv.sh $inbase.emb.$wembext.remove.arff $outbase.emb.$wembext.csv ","
+                                rm -f $inbase.emb.$wembext.arff
+                                rm -f $inbase.emb.remove.$wembext.arff
+                            fi
 
-                            #. ${UTILSDIR}/filter_lex_emb.sh $datafile $basename.combined.arff $embfile 15
-                            #. ${UTILSDIR}/filter_remove.sh $basename.combined.arff $basename.combined.remove.arff 1
-                            #. ${UTILSDIR}/arff2csv.sh $basename.combined.remove.arff $basename.combined.remove.csv ","
+
+                            if [ ! -f $outbase.combined.$wembext.csv ] || [ $newfilters -eq 1 ]; then
+                                echo "[INFO] Lexical + embedding filter ($wembext) -> $(basename $infile)"
+                                . ${UTILSDIR}/filter_lex_emb.sh $infile $inbase.combined.$wembext.arff $embfile 25
+                                . ${UTILSDIR}/filter_remove.sh $inbase.combined.$wembext.arff $inbase.combined.$wembext.remove.arff 1
+                                . ${UTILSDIR}/arff2csv.sh $inbase.combined.$wembext.remove.arff $outbase.combined.$wembext.csv ","
+                                rm -f $inbase.combined.$wembext.arff
+                                rm -f $inbase.combined.remove.$wembext.arff
+                            fi
                         done
-
-                        exit
-
-                        # wait for all jobs to finish
-                        wait
-
-                        # make K 25
                     fi
+
 
                     if [ $l == 'Ar' ]; then
                         # TODO
-                        echo $arff_file > /dev/null
+                        echo 'Arabic filters' > /dev/null
                     fi
+
 
                     if [ $l == 'Es' ]; then
                         # TODO
-                        echo $arff_file > /dev/null
+                        echo 'Spanish filters' > /dev/null
                     fi
 
-                    popd
+
+                    # wait for all jobs to finish before creating new ones
+                    wait
+
+                    popd > /dev/null
                 fi
             done
         done

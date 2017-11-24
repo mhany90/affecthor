@@ -4,10 +4,10 @@
 #SBATCH --time=00:15:00
 #SBATCH --mem=40GB
 
-
-# -i : input file
-# -o : output file
-# -lexicon_evaluator: lexicon evaluator to use (can be used multiple times)
+# Arguments:
+#  $1 : input file
+#  $2 : output file
+#  $3 : directory containing lexicon evaluators
 
 
 lexeval=""

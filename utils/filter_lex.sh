@@ -4,9 +4,9 @@
 #SBATCH --time=00:15:00
 #SBATCH --mem=40GB
 
-
-# -i : input file
-# -o : output file
+# Arguments:
+#  $1 : input file
+#  $2 : output file
 
 
 java -Xmx40G -cp weka.jar \

@@ -24,7 +24,10 @@ SETS=("train" "dev" "test")
 AFFECTS=("anger" "fear" "joy" "sadness")
 
 # sentiment lexicon directory
-SENTLEXDIR=$DATADIR/lexicon
+SENTLEXDIR=$DATADIR/lexicons
+
+# CMU Tweet NLP directory
+TWEETNLPDIR="$TOOLDIR/ark-tweet-nlp-0.3.2"
 
 # weka directory
 WEKADIR="$TOOLDIR/weka-3-9-1"
@@ -32,16 +35,16 @@ WEKADIR="$TOOLDIR/weka-3-9-1"
 
 # download data and normalise naming
 echo '[INFO] Downloading SemEval-2018 data...'
-#. $DATADIR/download_data.sh
+. $DATADIR/download_data.sh
 echo '[INFO] Data has been downloaded'
 
 # clean unvalid words from the data
 echo '[INFO] Cleaning SemEval-2018 data...'
-#. $DATADIR/clean_data.sh
+. $DATADIR/clean_data.sh
 echo '[INFO] Data has been cleaned'
 
 # dowload and format Arabic sentiment lexicons
-echo '[INFO] Preparing Arabic/Spanish sentiment lexicons...'
-. $DATADIR/download_lexicons.sh
-echo '[INFO] Arabic/Spanish sentiment lexicons are ready'
+#echo '[INFO] Preparing Arabic/Spanish sentiment lexicons...'
+#. $DATADIR/download_lexicons.sh
+#echo '[INFO] Arabic/Spanish sentiment lexicons are ready'
 

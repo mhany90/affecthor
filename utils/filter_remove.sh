@@ -1,9 +1,10 @@
 #!/bin/bash
 # this script converts a CSV file to ARFF
 
-# -R : field
-# -i : input file
-# -o : output file
+# Arguments:
+#  $1 : input file
+#  $2 : output file
+#  $3 : field to remove
 
 
 java -Xmx35G -cp weka.jar \

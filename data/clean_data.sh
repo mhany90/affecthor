@@ -20,15 +20,26 @@ for t in ${TASKS[@]}; do
 
                 if [ -f $datafile ]; then
                     # clean file
-                    python3 ${UTILSDIR}/clean_file.py $datafile $l "$datapath${basename}.clean"
+                    python3 ${UTILSDIR}/file_clean.py $datafile $l 2 $datafile.clean
 
-                    # convert to arff and remove numeric ids
-                    # weka returns an error otherwise
-                    python ${EMOINTDIR}/tweets_to_arff.py "$datapath${basename}.clean" $datafile.tmp
+                    # tokenize file
+                    pushd ${TWEETNLPDIR} > /dev/null
+                    . ${UTILSDIR}/file_tokenize.sh $datafile.clean 2 $datafile.tok
+                    popd > /dev/null
+                    sed -i '1d' $datafile.tok
 
+                    # remove stopwords
+                    python3 ${UTILSDIR}/file_stopwords.py $datafile.tok ${UTILSDIR}/stopwords/"stopwords_${l}.txt" 2 \
+                            "$datapath${basename}.tok"
+
+                    # convert to arff and remove numeric ids (weka returns an error otherwise)
+                    python ${EMOINTDIR}/tweets_to_arff.py "$datapath${basename}.tok" $datafile.tmp
                     cut -d ',' -f2- < $datafile.tmp > "${datapath}${basename}.arff"
                     sed -i '3d' "${datapath}${basename}.arff"
-                    rm $datafile.tmp
+
+                    rm -f $datafile.clean
+                    rm -f $datafile.tok
+                    rm -f $datafile.tmp
                 fi
             done
         done

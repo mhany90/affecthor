@@ -4,11 +4,11 @@
 #SBATCH --time=00:15:00
 #SBATCH --mem=40GB
 
-
-# -i : input file
-# -o : output file
-# -B : file containing the word embeddings
-# -K : number of words to concatenate
+# Arguments:
+#  $1 : input file
+#  $2 : output file
+#  $3 : file containing the word embeddings (compressed)
+#  $4 : number of words to concatenate
 
 
 java -Xmx40G -cp weka.jar \
