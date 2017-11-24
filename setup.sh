@@ -11,7 +11,7 @@ newtools=0
 # download data again with option --fetch-data, -d
 newdata=0
 
-# apply weka filters again with option --weka-filters, -f
+# download data again with option --weka-filters, -f
 newfilters=0
 
 
@@ -57,12 +57,12 @@ for arg in "$@"; do
         "--stage") set -- "$@" "-s" ;;
         "--fetch-data") set -- "$@" "-d" ;;
         "--install-tools") set -- "$@" "-t" ;;
-        "--weka-filters") set -- "@" "-f" ;;
+        "--weka-filters") set -- "$@" "-f" ;;
         *) set -- "$@" "$arg"
     esac
 done
 
-while getopts s:dt option
+while getopts s:dtf option
 do
     case "${option}"
     in

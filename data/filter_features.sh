@@ -36,7 +36,7 @@ EMB_ES=()
 EMB_ES_EXT=()
 
 
-################################################ EASY SETTINGS THAT WORK FOR NOW...
+################################################ EASY SETTINGS FOR TESTING
 TASKS=("EI-reg")
 EMB_EN=("w2v.twitter.edinburgh10M.400d.csv.gz")
 EMB_EN_EXT=("ed")
@@ -64,60 +64,68 @@ for t in ${TASKS[@]}; do
                 if [ -f $infile ]; then
                     pushd $WEKADIR > /dev/null
 
+                    # name for the jobs created
+                    jname="$t-$l-$a-$s"
 
+                    # apply filters for English
                     if [ $l == "En" ]; then
                         # apply lexical filter for English
                         if [ ! -f $outbase.lex.csv ] || [ $newfilters -eq 1 ]; then
                             echo "[INFO] Lexical filter -> $(basename $infile)"
-                            . ${UTILSDIR}/filter_lex.sh $infile $inbase.lex.arff
-                            . ${UTILSDIR}/filter_remove.sh $inbase.lex.arff $inbase.lex.remove.arff 1
-                            . ${UTILSDIR}/arff2csv.sh $inbase.lex.remove.arff $outbase.lex.csv ","
-                            rm -f $inbase.lex.arff
-                            rm -f $inbase.lex.remove.arff
+                            jid1=$(sbatch ${UTILSDIR}/filter_lex.sh $infile $inbase.lex.arff | cut -f 4 -d' ')
+                            jid2=$(sbatch --dependency=afterany:$jid1 ${UTILSDIR}/filter_remove.sh $inbase.lex.arff $inbase.lex.remove.arff 1 | cut -f 4 -d' ')
+                            jid3=$(sbatch --dependency=afterany:$jid2 --job-name=$jname ${UTILSDIR}/arff2csv.sh $inbase.lex.remove.arff $outbase.lex.csv "," | cut -f 4 -d' ')
                         fi
 
                         # apply embeddings and combined filters for English
-                        for (( e=0; e<4; e++ )); do
+                        for (( e=0; e<${#EMB_EN[@]}; e++ )); do
                             wemb=${EMB_EN[$e]}
                             wembext=${EMB_EN_EXT[$e]}
                             embfile="${EMBHOME_EN}/${wemb}"
 
                             if [ ! -f $outbase.emb.$wembext.csv ] || [ $newfilters -eq 1 ]; then
                                 echo "[INFO] Embedding filter ($wembext) -> $(basename $infile)"
-                                . ${UTILSDIR}/filter_emb.sh $infile $inbase.emb.$wembext.arff $embfile 25
-                                . ${UTILSDIR}/filter_remove.sh $inbase.emb.$wembext.arff $inbase.emb.$wembext.remove.arff 1
-                                . ${UTILSDIR}/arff2csv.sh $inbase.emb.$wembext.remove.arff $outbase.emb.$wembext.csv ","
-                                rm -f $inbase.emb.$wembext.arff
-                                rm -f $inbase.emb.remove.$wembext.arff
+                                jid1=$(sbatch ${UTILSDIR}/filter_emb.sh $infile $inbase.emb.$wembext.arff $embfile 25 | cut -f 4 -d' ')
+                                jid2=$(sbatch --dependency=afterany:$jid1 ${UTILSDIR}/filter_remove.sh $inbase.emb.$wembext.arff $inbase.emb.$wembext.remove.arff 1 | cut -f 4 -d' ')
+                                jid3=$(sbatch --dependency=afterany:$jid2 --job-name=$jname ${UTILSDIR}/arff2csv.sh $inbase.emb.$wembext.remove.arff $outbase.emb.$wembext.csv "," | cut -f 4 -d' ')
                             fi
-
 
                             if [ ! -f $outbase.combined.$wembext.csv ] || [ $newfilters -eq 1 ]; then
                                 echo "[INFO] Lexical + embedding filter ($wembext) -> $(basename $infile)"
-                                . ${UTILSDIR}/filter_lex_emb.sh $infile $inbase.combined.$wembext.arff $embfile 25
-                                . ${UTILSDIR}/filter_remove.sh $inbase.combined.$wembext.arff $inbase.combined.$wembext.remove.arff 1
-                                . ${UTILSDIR}/arff2csv.sh $inbase.combined.$wembext.remove.arff $outbase.combined.$wembext.csv ","
-                                rm -f $inbase.combined.$wembext.arff
-                                rm -f $inbase.combined.remove.$wembext.arff
+                                jid1=$(sbatch ${UTILSDIR}/filter_lex_emb.sh $infile $inbase.combined.$wembext.arff $embfile 25 | cut -f 4 -d' ')
+                                jid2=$(sbatch --dependency=afterany:$jid1 ${UTILSDIR}/filter_remove.sh $inbase.combined.$wembext.arff $inbase.combined.$wembext.remove.arff 1 | cut -f 4 -d' ')
+                                jid3=$(sbatch --dependency=afterany:$jid2 --job-name=$jname ${UTILSDIR}/arff2csv.sh $inbase.combined.$wembext.remove.arff $outbase.combined.$wembext.csv "," | cut -f 4 -d' ')
                             fi
+                        done
+
+                        # wait for all jobs to finish before creating new ones
+                        srun --dependency=singleton --job-name=$jname wait
+
+                        # clean files
+                        rm -f $inbase.lex.arff
+                        rm -f $inbase.lex.remove.arff
+                        for wembext in ${EMB_EN_EXT[@]}; do
+                            rm -f $inbase.emb.$wembext.arff
+                            rm -f $inbase.emb.remove.$wembext.arff
+                            rm -f $inbase.combined.$wembext.arff
+                            rm -f $inbase.combined.remove.$wembext.arff
                         done
                     fi
 
 
+                    # apply filters for Arabic
                     if [ $l == 'Ar' ]; then
                         # TODO
                         echo 'Arabic filters' > /dev/null
                     fi
 
 
+                    # apply filters for Spanish
                     if [ $l == 'Es' ]; then
                         # TODO
                         echo 'Spanish filters' > /dev/null
                     fi
 
-
-                    # wait for all jobs to finish before creating new ones
-                    wait
 
                     popd > /dev/null
                 fi

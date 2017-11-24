@@ -18,7 +18,7 @@ for t in ${TASKS[@]}; do
                 extension=".txt"
                 datafile="$datapath$basename$extension"
 
-                if [ -f $datafile ]; then
+                if [ -f $datafile ] && [ ! -f "${datapath}${basename}.arff" ] ; then
                     # clean file
                     python3 ${UTILSDIR}/file_clean.py $datafile $l 2 $datafile.clean
 
@@ -33,7 +33,7 @@ for t in ${TASKS[@]}; do
                             "$datapath${basename}.tok"
 
                     # convert to arff and remove numeric ids (weka returns an error otherwise)
-                    python ${EMOINTDIR}/tweets_to_arff.py "$datapath${basename}.tok" $datafile.tmp
+                    python2.7 ${EMOINTDIR}/tweets_to_arff.py "$datapath${basename}.tok" $datafile.tmp
                     cut -d ',' -f2- < $datafile.tmp > "${datapath}${basename}.arff"
                     sed -i '3d' "${datapath}${basename}.arff"
 

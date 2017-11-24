@@ -34,7 +34,7 @@ echo '[INFO] Preparing WEKA 3.9.1...'
 if [ ! -d "$WEKADIR" ] || [ $newtools -ge 1 ]; then
 	  rm -rf $WEKADIR
 	  pushd $TOOLDIR > /dev/null
-	  wget "prdownloads.sourceforge.net/weka/weka-3-9-1.zip"
+	  wget -q "prdownloads.sourceforge.net/weka/weka-3-9-1.zip"
 	  unzip weka-3-9-1.zip
     rm -f weka-3-9-1.zip
     echo '[INFO] Building LibLinear package on WEKA...'
