@@ -20,7 +20,7 @@ for t in ${TASKS[@]}; do
 
                 if [ -f $datafile ]; then
                     # clean file
-                    python ${UTILSDIR}/file_clean.py $datafile $l 2 $datafile.clean
+                    python3 ${UTILSDIR}/file_clean.py $datafile $l 2 $datafile.clean
 
                     # tokenize file
                     pushd ${TWEETNLPDIR} > /dev/null
@@ -29,7 +29,7 @@ for t in ${TASKS[@]}; do
                     sed -i '1d' $datafile.tok
 
                     # remove stopwords
-                    python ${UTILSDIR}/file_stopwords.py $datafile.tok ${UTILSDIR}/stopwords/"stopwords_${l}.txt" 2 \
+                    python3 ${UTILSDIR}/file_stopwords.py $datafile.tok ${UTILSDIR}/stopwords/"stopwords_${l}.txt" 2 \
                             "$datapath${basename}.tok"
 
                     # convert to arff and remove numeric ids (weka returns an error otherwise)
