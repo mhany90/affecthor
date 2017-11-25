@@ -106,9 +106,9 @@ for t in ${TASKS[@]}; do
                         rm -f $inbase.lex.remove.arff
                         for wembext in ${EMB_EN_EXT[@]}; do
                             rm -f $inbase.emb.$wembext.arff
-                            rm -f $inbase.emb.remove.$wembext.arff
+                            rm -f $inbase.emb.$wembext.remove.arff
                             rm -f $inbase.combined.$wembext.arff
-                            rm -f $inbase.combined.remove.$wembext.arff
+                            rm -f $inbase.combined.$wembext.remove.arff
                         done
                     fi
 

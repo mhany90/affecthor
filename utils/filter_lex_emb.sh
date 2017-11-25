@@ -1,8 +1,8 @@
 #!/bin/bash
 # this script applies a filter using both the predefined English lexicons and an existing embedding
 
-#SBATCH --time=00:15:00
-#SBATCH --mem=40GB
+#SBATCH --time=00:30:00
+#SBATCH --mem=50GB
 
 # Arguments:
 #  $1 : input file
@@ -11,7 +11,7 @@
 #  $4 : number of words to concatenate
 
 
-java -Xmx40G -cp weka.jar \
+java -Xmx50G -cp weka.jar \
      weka.Run weka.filters.MultiFilter \
      -F "weka.filters.unsupervised.attribute.TweetToLexiconFeatureVector -I 1 -A -D -F -H -J -L -N -P -Q -R -T -U" \
      -F "weka.filters.unsupervised.attribute.TweetToEmbeddingsFeatureVector \
