@@ -19,7 +19,7 @@ for f in ${3}/*; do
 done
 
 java -Xmx50G -cp weka.jar \
-     we5a.Run weka.filters.MultiFilter \
+     weka.Run weka.filters.MultiFilter \
      -F "weka.filters.unsupervised.attribute.TweetToInputLexiconFeatureVector -I 1 -U ${lexeval}" \
      -F "weka.filters.unsupervised.attribute.TweetToEmbeddingsFeatureVector \
      -embeddingHandler \"affective.core.CSVEmbeddingHandler -K ${4} -sep \\\"\\\\t\\\" -I last\" -S 0 -K ${5} -I 1 -U" \
