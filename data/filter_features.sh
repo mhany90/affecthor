@@ -37,7 +37,7 @@ EMB_ES_EXT=()
 
 
 ################################################ EASY SETTINGS FOR TESTING
-TASKS=("EI-reg")
+#TASKS=("EI-reg")
 #EMB_EN=("w2v.twitter.edinburgh10M.400d.csv.gz")
 #EMB_EN_EXT=("ed")
 ################################################
