@@ -79,6 +79,7 @@ for t in ${TASKS[@]}; do
 
                         # apply embeddings and combined filters for English
                         for (( e=0; e<${#EMB_EN[@]}; e++ )); do
+
                             wemb=${EMB_EN[$e]}
                             wembext=${EMB_EN_EXT[$e]}
                             embfile="${EMBHOME_EN}/${wemb}"

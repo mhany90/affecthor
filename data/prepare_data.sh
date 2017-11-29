@@ -44,7 +44,7 @@ echo '[INFO] Cleaning SemEval-2018 data...'
 echo '[INFO] Data has been cleaned'
 
 # dowload and format Arabic sentiment lexicons
-#echo '[INFO] Preparing Arabic/Spanish sentiment lexicons...'
+echo '[INFO] Preparing Arabic/Spanish sentiment lexicons...'
 #. $DATADIR/download_lexicons.sh
-#echo '[INFO] Arabic/Spanish sentiment lexicons are ready'
+echo '[INFO] Arabic/Spanish sentiment lexicons are ready'
 
