@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import argparse
+from datetime import datetime
 
 def get_embeddings(efile_name):
     df  = pd.read_csv(efile_name, sep = '\t', header=None, skiprows=1, quoting=3)
@@ -40,14 +41,14 @@ def output_embeddings(efile1, efile2):
     
     for v in v1:
         if len(v) < 140:
-            if v in v2.values:
+            try:
                 i1 = v1[v1 == v].index[0]
                 i2 = v2[v2 == v].index[0]
                 avgd_ems = avg_embeddings(em1.iloc[[i1]], em2.iloc[[i2]])
                 avgd_vec = avgd_ems.append(pd.Series(v1[i1]), ignore_index=True)
                 avgd = avgd.append(avgd_vec, ignore_index=True)
                 #print(i1,"\t",avgd.shape)
-            else:
+            except IndexError:
                 i1 = v1[v1 == v].index[0]
                 srs = em1.iloc[i1].append(pd.Series(v1[i1]), ignore_index=True)
                 avgd = avgd.append(srs, ignore_index=True)
@@ -59,6 +60,7 @@ parser = argparse.ArgumentParser(description="""Averages two sets of word embedd
 parser.add_argument("--efile1", help="path to first embedding file", required=True)
 parser.add_argument("--efile2", help="path to second embedding file", required=True)
 parser.add_argument("--saveas", help="name for averaged embedding file", required=False)
+startTime = datetime.now()
 
 args = parser.parse_args()
 efile1 = str(args.efile1)
@@ -67,3 +69,4 @@ saveas = str(args.saveas)
 avgd = output_embeddings(efile1, efile2)
 avgd.to_csv(saveas, sep="\t", header=False, index=False)
 print("Wrote embeddings of dim",avgd.shape,"to",saveas,".")
+print(datetime.now() - startTime)
