@@ -18,8 +18,8 @@ AFFECTS=("anger" "fear" "joy" "sadness")
 WEKADIR="$TOOLDIR/weka-3-9-1"
 
 # directories where to find lexicons
-ARLEXDIR=$SENTLEXDIR/Ar
-ESLEXDIR=$SENTLEXDIR/Es
+ARLEXDIR=$SENTLEXDIR/${CODES[1]}
+ESLEXDIR=$SENTLEXDIR/${CODES[2]}
 
 # directories where to find embeddings (@peregrine.hpc.rug.nl)
 EMBHOME_EN="/data/s3094723/embeddings/en"
@@ -82,9 +82,9 @@ for t in ${TASKS[@]}; do
                         # apply lexical filter for English
                         if [ ! -f $outbase.lex.csv ] || [ $newfilters -eq 1 ]; then
                             echo "[INFO] Lexical filter -> $(basename $infile)"
-                            . ${UTILSDIR}/filter_lex.sh $infile $inbase.lex.arff
-                            . ${UTILSDIR}/filter_remove.sh $inbase.lex.arff $inbase.lex.remove.arff 1
-                            . ${UTILSDIR}/arff2csv.sh $inbase.lex.remove.arff $outbase.lex.csv ","
+                            jid1=$(sbatch ${UTILSDIR}/filter_lex.sh $infile $inbase.lex.arff | cut -f 4 -d' ')
+                            jid2=$(sbatch --dependency=afterany:$jid1 ${UTILSDIR}/filter_remove.sh $inbase.lex.arff $inbase.lex.remove.arff 1 | cut -f 4 -d' ')
+                            jid3=$(sbatch --dependency=afterany:$jid2 --job-name=$jname ${UTILSDIR}/arff2csv.sh $inbase.lex.remove.arff $outbase.lex.csv "," | cut -f 4 -d' ')
                         fi
 
                         # apply embeddings and combined filters for English
@@ -129,9 +129,9 @@ for t in ${TASKS[@]}; do
                         # apply lexical filter for Arabic
                         if [ ! -f $outbase.lex.csv ] || [ $newfilters -eq 1 ]; then
                             echo "[INFO] Lexical filter -> $(basename $infile)"
-                            . ${UTILSDIR}/filter_lexinput.sh $infile $inbase.lex.arff $ARLEXDIR $l
-                            . ${UTILSDIR}/filter_remove.sh $inbase.lex.arff $inbase.lex.remove.arff 1
-                            . ${UTILSDIR}/arff2csv.sh $inbase.lex.remove.arff $outbase.lex.csv ","
+                            jid1=$(sbatch ${UTILSDIR}/filter_lexinput.sh $infile $inbase.lex.arff $ARLEXDIR $l | cut -f 4 -d' ')
+                            jid2=$(sbatch --dependency=afterany:$jid1 ${UTILSDIR}/filter_remove.sh $inbase.lex.arff $inbase.lex.remove.arff 1 | cut -f 4 -d' ')
+                            jid3=$(sbatch --dependency=afterany:$jid2 --job-name=$jname ${UTILSDIR}/arff2csv.sh $inbase.lex.remove.arff $outbase.lex.csv "," | cut -f 4 -d' ')
                         fi
 
                         # apply embeddings and combined filters for Arabic
