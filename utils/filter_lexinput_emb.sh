@@ -8,20 +8,24 @@
 #  $1 : input file
 #  $2 : output file
 #  $3 : directory containing lexicon evaluators
-#  $4 : file containing the word embeddings (compressed)
-#  $5 : number of words to concatenate
+#  $4 : language code (En, Ar, Es)
+#  $5 : file containing the word embeddings (compressed)
+#  $6 : number of words to concatenate
 
 
-lexeval=""
+# join lexical filter input parameters
+lexparams="-I 1 -U"
 for f in ${3}/*; do
-	lex_file="-lexicon_evaluator $f"
-	lexeval="${lexeval} ${lex_file}"
+	lexparams="${lexparams} -lexicon_evaluator \"affective.core.ArffLexiconEvaluator -lexiconFile $f -A 1 -B ${4}\""
 done
+lexfilter="weka.filters.unsupervised.attribute.TweetToInputLexiconFeatureVector ${lexparams}"
 
-java -Xmx50G -cp weka.jar \
-     weka.Run weka.filters.MultiFilter \
-     -F "weka.filters.unsupervised.attribute.TweetToInputLexiconFeatureVector -I 1 -U ${lexeval}" \
-     -F "weka.filters.unsupervised.attribute.TweetToEmbeddingsFeatureVector \
-     -embeddingHandler \"affective.core.CSVEmbeddingHandler -K ${4} -sep \\\"\\\\t\\\" -I last\" -S 0 -K ${5} -I 1 -U" \
-     -i "${1}" -o "${2}"
+# join embedding filter input parameters 
+embparams="-embeddingHandler \"affective.core.CSVEmbeddingHandler -K ${5} -sep \\\"\\\\t\\\" -I last\" -S 0 -K ${6} -I 1 -U"
+embfilter="weka.filters.unsupervised.attribute.TweetToEmbeddingsFeatureVector ${embparams}"
+
+
+# build and run weka filtering command
+run_filter="java -Xmx50G -cp weka.jar weka.Run weka.filters.MultiFilter -F \"${lexfilter}\" -F \"${embfilter}\" -i ${1} -o ${2}"
+eval $run_filter
 

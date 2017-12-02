@@ -46,9 +46,10 @@ with open(ifile, 'r') as fin:
                     # Arabic data
                     if lang == 'Ar':
                         # delete quotation marks to avoid weka errors
-                        a = field.replace('"', '')
+                        a1 = field.replace('"', '')
+                        a2 = a1.replace("'", '')
                         # replace mentions with a generic token
-                        b = re.sub(re_mention, r'@username', a)
+                        b = re.sub(re_mention, r'@username', a2)
                         # replace control characters
                         c = re.sub(re_control, r' ', b)
                         # replace emoticons

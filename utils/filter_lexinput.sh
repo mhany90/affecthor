@@ -8,15 +8,18 @@
 #  $1 : input file
 #  $2 : output file
 #  $3 : directory containing lexicon evaluators
+#  $4 : language code (En, Ar, Es)
 
 
-lexeval=""
+# join lexical filter input parameters
+lexparams="-I 1 -U"
 for f in ${3}/*; do
-	lex_file="-lexicon_evaluator $f"
-	lexeval="${lexeval} ${lex_file}"
+	lexparams="${lexparams} -lexicon_evaluator \"affective.core.ArffLexiconEvaluator -lexiconFile $f -A 1 -B ${4}\""
 done
+lexfilter="weka.filters.unsupervised.attribute.TweetToInputLexiconFeatureVector ${lexparams}"
 
-java -Xmx40G -cp weka.jar \
-     weka.Run weka.filters.unsupervised.attribute.TweetToInputLexiconFeatureVector \
-     -I 1 -U "${lexeval}" -i "${1}" -o "${2}"
+
+# build and run weka filtering command
+run_filter="java -Xmx40G -cp weka.jar weka.Run ${lexfilter} -i ${1} -o ${2}"
+eval $run_filter
 

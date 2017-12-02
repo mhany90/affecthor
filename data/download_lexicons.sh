@@ -1,12 +1,9 @@
 #!/bin/bash
 # this script downloads sentiment lexicons for Arabic and Spanish
 
-# TODO: Lexicons for Arabic and Spanish still need a lot of work. Disabled for now
-# This file needs to be fixed and extended
 
 # Arabic valence lexicons
-ARLEXDIR=$SENTLEXDIR/${CODES[1]}
-#rm -rf ${ARLEXDIR}
+ARLEXDIR=$SENTLEXDIR/Ar
 
 if [ ! -d "$ARLEXDIR" ] || [ $newdata -eq 1 ]; then
     rm -rf $ARLEXDIR
@@ -22,11 +19,6 @@ if [ ! -d "$ARLEXDIR" ] || [ $newdata -eq 1 ]; then
     wget -q "http://saifmohammad.com/WebDocs/Arabic%20Lexicons/S140-unigrams-pmilexicon_ar.txt"
     wget -q "http://saifmohammad.com/WebDocs/Arabic%20Lexicons/NRC-HS-unigrams-pmilexicon_ar.txt"
     popd > /dev/null
-
-    # filter entries that do not concern us from lexicons
-    #grep "$(printf '\t')positive$(printf '\t')1\|$(printf '\t')negative$(printf '\t')1" \
-    #     ${ARLEXDIR}/nrc_emotion_ar.txt > ${ARLEXDIR}/nrc_emotion.txt
-    #rm -f ${ARLEXDIR}/nrc_emotion_ar.txt
 
     echo '[INFO] Cleaning Arabic lexicons...'
     for filepath in ${ARLEXDIR}/*.txt; do
@@ -44,17 +36,18 @@ if [ ! -d "$ARLEXDIR" ] || [ $newdata -eq 1 ]; then
         . ${UTILSDIR}/csv2arff.sh ${ARLEXDIR}/$filename.csv ${ARLEXDIR}/$filename.arff "\t"
         popd > /dev/null
 
-        #rm -f $filepath
-        #rm -f ${ARLEXDIR}/$filename.format
-        #rm -f ${ARLEXDIR}/$filename.csv
+        rm -f $filepath
+        rm -f ${ARLEXDIR}/$filename.format
+        rm -f ${ARLEXDIR}/$filename.csv
     done
 fi
-exit
+
 
 # Spanish valence lexicons
-ESLEXDIR=$SENTLEXDIR/${CODES[2]}
+ESLEXDIR=$SENTLEXDIR/Es
 
-if [ ! -d "$ESLEXDIR" ] || [ $newdata -eq 1 ]; then
+#if [ 0 ] && [ ! -d "$ESLEXDIR" ] || [ $newdata -eq 1 ]; then
+if [0]; then
     rm -rf $ESLEXDIR
     mkdir -p $ESLEXDIR
     pushd $ESLEXDIR
