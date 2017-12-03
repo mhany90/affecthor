@@ -82,16 +82,18 @@ for line in fin_lines:
             # Spanish data
             elif lang == 'Es':
                 # remove accents
-                field2 = strip_specials_es(field)
+                a1 = strip_specials_es(field)
+                # delete quotation marks to avoid weka errors
+                a2 = a1.replace('"', '')
                 # replace repeated letters with only 2 occurrences
-                a = re.sub(re_repeat, r'\1\1', field2)
+                b = re.sub(re_repeat, r'\1\1', a2)
                 # replace mentions with a generic token
-                b = re.sub(re_mention, r'@username', a)
+                c = re.sub(re_mention, r'@username', b)
                 # replace control characters
-                c = re.sub(re_control, r' ', b)
+                d = re.sub(re_control, r' ', c)
                 # replace emoticons
-                d = re.sub(re_emoticon, r' \1 ', c)
-                fout.write(d.lower())
+                e = re.sub(re_emoticon, r' \1 ', d)
+                fout.write(e.lower())
 
             # English data
             else:
