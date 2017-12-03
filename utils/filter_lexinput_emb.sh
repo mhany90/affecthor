@@ -26,6 +26,6 @@ embfilter="weka.filters.unsupervised.attribute.TweetToEmbeddingsFeatureVector ${
 
 
 # build and run weka filtering command
-run_filter="java -Xmx50G -cp weka.jar weka.Run weka.filters.MultiFilter -F \"${lexfilter}\" -F \"${embfilter}\" -i ${1} -o ${2}"
+run_filter="java -Xmx50G -cp weka.jar weka.Run weka.filters.MultiFilter -F '${lexfilter}' -F '${embfilter}' -i ${1} -o ${2}"
 eval $run_filter
 

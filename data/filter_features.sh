@@ -32,12 +32,12 @@ EMB_EN=("w2v.twitter.edinburgh10M.400d.csv.gz" "Googlenews_emb.reformatted.csv.g
 EMB_EN_EXT=("ed" "ggl" "glvt" "400m")
 
 # word embeddings to apply (Arabic)
-EMB_AR=()
-EMB_AR_EXT=("temb")
+EMB_AR=("ar.wiki.reformated.csv.gz")
+EMB_AR_EXT=("wiki")
 
 # word embeddings to apply (Spanish)
-EMB_ES=()
-EMB_ES_EXT=("temb")
+EMB_ES=("es.wiki.reformated.csv.gz")
+EMB_ES_EXT=("wiki")
 
 # number of words to concatenate when using embedding filters
 KWORDS_EN=25
@@ -46,11 +46,11 @@ KWORDS_ES=25
 
 
 ################################################ EASY SETTINGS FOR TESTING ONLY
-CODES=('Es')
-TASKS=("EI-reg")
+#CODES=('Es')
+#TASKS=("EI-reg")
 #EMB_EN=("w2v.twitter.edinburgh10M.400d.csv.gz")
 #EMB_EN_EXT=("ed")
-################################################ COMMENT OUT WHEN SUBMITTING A JOB
+################################################ COMMENT OUT WHEN SUBMITTING JOBS
 
 
 # iterate over tasks
