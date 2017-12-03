@@ -20,7 +20,7 @@ newfilters=0
 set -e
 set -u
 set -o pipefail
-set -x
+#set -x
 
 
 # define directory locations

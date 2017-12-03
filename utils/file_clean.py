@@ -42,15 +42,20 @@ def strip_specials_es(s):
         return s
 
 
+# open file and attempt reading
 if lang == 'Es':
-    fin = open(ifile, 'r', encoding = 'latin-1')
-    fout = open(ofile, 'w', encoding = 'latin-1')
+    try:
+    	fin_lines = open(ifile, 'r').readlines()
+    	fout = open(ofile, 'w')
+    except:
+    	fin_lines = open(ifile, 'r', encoding = 'latin-1').readlines()
+    	fout = open(ofile, 'w', encoding = 'latin-1')
 else:
-    fin = open(ifile, 'r')
+    fin_lines = open(ifile, 'r').readlines()
     fout = open(ofile, 'w')
 
-
-for line in fin.readlines():
+# clean each line
+for line in fin_lines:
     ind = 0
     fields = line.split('\t')
 
