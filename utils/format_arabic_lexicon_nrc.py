@@ -1,9 +1,9 @@
 #!/usr/bin/python3
-# this file correctly formats the NRC emotion lexicon for Arabic
-# entries that contain the same word in the first field are merged
+# this file formats the NRC emotion lexicon for Arabic
 
 import sys
 import string
+
 
 # source data file
 ifile = sys.argv[1]
@@ -18,6 +18,7 @@ with open(ifile, 'r') as fin:
     lines = fin.readlines()
     header = lines[0]
 
+    # entries that contain the same word in the first field are merged
     for line in lines[1:]:
         word = line.split()[0]
         emos = line.split()[1:]

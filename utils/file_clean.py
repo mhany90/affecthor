@@ -5,6 +5,7 @@
 import re
 import sys
 import string
+import unicodedata
 
 # source data file
 ifile = sys.argv[1]
@@ -30,59 +31,78 @@ re_control = r'(\\[tnrfv])+'
 # matches other special characters such as emoticons
 re_emoticon = r'([^\w\s' + string.punctuation + r'])'
 
-with open(ifile, 'r') as fin:
-    with open(ofile, 'w') as fout:
-        for line in fin.readlines():
-            ind = 0
-            fields = line.split('\t')
+# replace special characters for Spanish
+def strip_specials_es(s):
+    try:
+        return ''.join(c for c in unicodedata.normalize('NFD', s.encode('latin-1').decode('utf-8')) if unicodedata.category(c) != 'Mn')
+    except:
+        charmap = {'á':'a', 'é':'e', 'í':'i', 'ó':'o', 'ú':'u', 'ñ':'n', '¿':'', '¡':''}
+        for k in charmap:
+            s = s.replace(k, charmap[k])
+        return s
 
-            for field in fields:
-                ind += 1
-                # directly output or filter a field
-                if ind != filter_field:
-                    fout.write(field)
-                else:
 
-                    # Arabic data
-                    if lang == 'Ar':
-                        # delete quotation marks to avoid weka errors
-                        a1 = field.replace('"', '')
-                        a2 = a1.replace("'", '')
-                        # replace mentions with a generic token
-                        b = re.sub(re_mention, r'@username', a2)
-                        # replace control characters
-                        c = re.sub(re_control, r' ', b)
-                        # replace emoticons
-                        d = re.sub(re_emoticon, r' \1 ', c)
-                        fout.write(d.lower())
+if lang == 'Es':
+    fin = open(ifile, 'r', encoding = 'latin-1')
+    fout = open(ofile, 'w', encoding = 'latin-1')
+else:
+    fin = open(ifile, 'r')
+    fout = open(ofile, 'w')
 
-                    # Spanish data
-                    elif lang == 'Es':
-                        # replace repeated letters with only 2 occurrences
-                        a = re.sub(re_repeat, r'\1\1', field)
-                        # replace mentions with a generic token
-                        b = re.sub(re_mention, r'@username', a)
-                        # replace control characters
-                        c = re.sub(re_control, r' ', b)
-                        # replace emoticons
-                        d = re.sub(re_emoticon, r' \1 ', c)
-                        fout.write(d.lower())
 
-                    # English data
-                    else:
-                        # replace repeated letters with only 2 occurrences
-                        a = re.sub(re_repeat, r'\1\1', field)
-                        # replace mentions with a generic token
-                        b = re.sub(re_mention, r'@username', a)
-                        # replace control characters
-                        c = re.sub(re_control, r' ', b)
-                        # replace emoticons
-                        d = re.sub(re_emoticon, r' \1 ', c)
-                        fout.write(d.lower())
+for line in fin.readlines():
+    ind = 0
+    fields = line.split('\t')
 
-                # print separators
-                if ind < len(fields):
-                    fout.write('\t')
-                else:
-                    fout.write('')
+    for field in fields:
+        ind += 1
+        # directly output or filter a field
+        if ind != filter_field:
+            fout.write(field)
+        else:
+
+            # Arabic data
+            if lang == 'Ar':
+                # delete quotation marks to avoid weka errors
+                a1 = field.replace('"', '')
+                a2 = a1.replace("'", '')
+                # replace mentions with a generic token
+                b = re.sub(re_mention, r'@username', a2)
+                # replace control characters
+                c = re.sub(re_control, r' ', b)
+                # replace emoticons
+                d = re.sub(re_emoticon, r' \1 ', c)
+                fout.write(d.lower())
+
+            # Spanish data
+            elif lang == 'Es':
+                # remove accents
+                field2 = strip_specials_es(field)
+                # replace repeated letters with only 2 occurrences
+                a = re.sub(re_repeat, r'\1\1', field2)
+                # replace mentions with a generic token
+                b = re.sub(re_mention, r'@username', a)
+                # replace control characters
+                c = re.sub(re_control, r' ', b)
+                # replace emoticons
+                d = re.sub(re_emoticon, r' \1 ', c)
+                fout.write(d.lower())
+
+            # English data
+            else:
+                # replace repeated letters with only 2 occurrences
+                a = re.sub(re_repeat, r'\1\1', field)
+                # replace mentions with a generic token
+                b = re.sub(re_mention, r'@username', a)
+                # replace control characters
+                c = re.sub(re_control, r' ', b)
+                # replace emoticons
+                d = re.sub(re_emoticon, r' \1 ', c)
+                fout.write(d.lower())
+
+        # print separators
+        if ind < len(fields):
+            fout.write('\t')
+        else:
+            fout.write('')
 

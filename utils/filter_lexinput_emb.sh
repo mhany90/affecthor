@@ -20,7 +20,7 @@ for f in ${3}/*; do
 done
 lexfilter="weka.filters.unsupervised.attribute.TweetToInputLexiconFeatureVector ${lexparams}"
 
-# join embedding filter input parameters 
+# join embedding filter input parameters
 embparams="-embeddingHandler \"affective.core.CSVEmbeddingHandler -K ${5} -sep \\\"\\\\t\\\" -I last\" -S 0 -K ${6} -I 1 -U"
 embfilter="weka.filters.unsupervised.attribute.TweetToEmbeddingsFeatureVector ${embparams}"
 
