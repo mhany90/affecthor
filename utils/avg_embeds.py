@@ -70,8 +70,4 @@ saveas = str(args.saveas)
 avgd = output_embeddings(efile1, efile2)
 avgd.to_csv(saveas, sep="\t", header=False, index=False)
 print("Wrote embeddings of dim",avgd.shape,"to",saveas,".")
-<<<<<<< HEAD
-print(datetime.now() - startTime)
-=======
-
->>>>>>> 5def433e2a2fe22318613ad3664a32fb70a2af13
+print("Took ", datetime.now() - startTime)
