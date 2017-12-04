@@ -1,13 +1,14 @@
+#!/usr/bin/python3
+
 import pandas as pd
 import numpy as np
 import argparse
 from datetime import datetime
 
 def get_embeddings(efile_name):
-    df  = pd.read_csv(efile_name, sep = '\t', header=None, skiprows=1, quoting=3)
+    df = pd.read_csv(efile_name, sep = '\t', header=None, skiprows=1, quoting=3)
     embeddings = df.iloc[:,:df.shape[1]-1].astype("float64")
     vocab = df.iloc[:,df.shape[1]-1].astype("str")
-    
     return embeddings, vocab
 
 def compare(em1, v1, em2, v2):
@@ -38,7 +39,7 @@ def output_embeddings(efile1, efile2):
     em1, v1, em2, v2 = compare(em1, v1, em2, v2)
 
     avgd = pd.DataFrame()
-    
+
     for v in v1:
         if len(v) < 140:
             try:
@@ -69,4 +70,8 @@ saveas = str(args.saveas)
 avgd = output_embeddings(efile1, efile2)
 avgd.to_csv(saveas, sep="\t", header=False, index=False)
 print("Wrote embeddings of dim",avgd.shape,"to",saveas,".")
+<<<<<<< HEAD
 print(datetime.now() - startTime)
+=======
+
+>>>>>>> 5def433e2a2fe22318613ad3664a32fb70a2af13

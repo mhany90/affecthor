@@ -3,7 +3,7 @@
 
 
 # iterate over tasks
-for (( t=0; t<4; t++ )); do
+for (( t=0; t<${#TASKS[@]}; t++ )); do
     task=${TASKS[$t]}
     type=${TYPES[$t]}
 
@@ -16,7 +16,7 @@ for (( t=0; t<4; t++ )); do
     mkdir -p $TDIR
 
     # iterate over languages
-    for (( l=0; l<3; l++ )); do
+    for (( l=0; l<${#CODES[@]}; l++ )); do
         code=${CODES[$l]}
         lang=${LANGS[$l]}
 

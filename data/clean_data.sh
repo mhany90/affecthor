@@ -3,7 +3,10 @@
 
 
 # iterate over tasks
-for t in ${TASKS[@]}; do
+for (( i=0; i<${#TASKS[@]}; i++ )); do
+    t=${TASKS[$i]}
+    type=${TYPES[$i]}
+
     # iterate over each language
     for l in ${CODES[@]}; do
         TAFFECTS=${AFFECTS[@]}
@@ -18,7 +21,7 @@ for t in ${TASKS[@]}; do
                 extension=".txt"
                 datafile="$datapath$basename$extension"
 
-                if [ -f $datafile ] && [ ! -f "${datapath}${basename}.arff" ] ; then
+                if [ -f $datafile ] && [ ! -f "${datapath}${basename}.arff" ]; then
                     # clean file
                     python3 ${UTILSDIR}/file_clean.py $datafile $l 2 $datafile.clean
 
@@ -32,6 +35,12 @@ for t in ${TASKS[@]}; do
                     python3 ${UTILSDIR}/file_stopwords.py $datafile.tok ${UTILSDIR}/stopwords/"stopwords_${l}.txt" 2 \
                             "$datapath${basename}.tok"
 
+                    # drop text in the last field for classification tasks
+                    if [ $type == "oc" ]; then
+                        mv "$datapath${basename}.tok" $datafile.tok2
+                        awk 'BEGIN { FS = OFS = "\t" } { sub(/:[^:]+/, "", $NF); print }' $datafile.tok2 > "$datapath${basename}.tok"
+                    fi
+
                     # convert to arff and remove numeric ids (weka returns an error otherwise)
                     python2.7 ${EMOINTDIR}/tweets_to_arff.py "$datapath${basename}.tok" $datafile.tmp
                     cut -d ',' -f2- < $datafile.tmp > "${datapath}${basename}.arff"
@@ -39,6 +48,7 @@ for t in ${TASKS[@]}; do
 
                     rm -f $datafile.clean
                     rm -f $datafile.tok
+                    rm -f $datafile.tok2
                     rm -f $datafile.tmp
                 fi
             done

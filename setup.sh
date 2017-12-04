@@ -93,7 +93,7 @@ fi
 # STAGE 2 - apply weka filters
 if [ $stage -le 2 ]; then
     echo '[INFO] Applying feature filters...'
-    . $DATADIR/filter_features.sh
+   . $DATADIR/filter_features.sh
     echo '[INFO] Finished feature filtering'
 fi
 
