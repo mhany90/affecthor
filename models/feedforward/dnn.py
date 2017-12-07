@@ -21,11 +21,11 @@ from sklearn.model_selection import KFold
 
 def read_and_shuffle(f):
     df = pd.read_csv(f, header=None, skiprows=0)
-    #df = shuffle(df)
-    x = df.iloc[0:]
+#    df = shuffle(df)
+    #x = df.iloc[0:]
     #y = df[0]
     #return x.iloc[:-200], y.iloc[:-200], x.iloc[-200:], y.iloc[-200:]
-    return x
+    return df
 
 def read_and_shuffle_cv(f):
     df = pd.read_csv(f, header=None, skiprows=1)
@@ -79,7 +79,7 @@ network = tflearn.regression(network, optimizer='adam', learning_rate=0.001,
 #files = [DIR+f for f in os.listdir(DIR) if "sadness" in f]
 
 
-files = ['/data/s3094723/extra_features/EI-reg-En-joy-train.txt.sent.lex']
+files = ['/data/s3094723/extra_features/EI-reg-En-sadness-train.txt.sent.lex']
 #test_file = '/home/s3094723/SEMEVAL/affecthor/data/EI-reg/En/dev/'	
 
 
@@ -91,19 +91,21 @@ files = ['/data/s3094723/extra_features/EI-reg-En-joy-train.txt.sent.lex']
 
 for f in files:
     print(f)
-#    train_x, train_y, test_x, test_y = read_and_shuffle(f)
     data = read_and_shuffle(f)
-    act_data = data.values
     correlations = []
-    kf = KFold(n_splits=8, shuffle = True)
+    kf = KFold(n_splits=10)
     for train, test in kf.split(data):
-        train_data = data.iloc[train[0]:]
-        test_data = data.iloc[:test[-1]]
+        print("index test: " ,test)
+        print("index train:", train)
+        train_data = data.iloc[train,:]
+        test_data = data.iloc[test,:]
+#        print(train_data)
         train_y = train_data.iloc[:,0]
         test_y = test_data.iloc[:,0]
-        del train_data[0]
-        del test_data[0]
-        print(len(test_data), len(train_data))   
+        train_data = train_data.drop(train_data.columns[0], axis=1)
+ #       print(train_data)
+        test_data = test_data.drop(test_data.columns[0], axis=1)
+        print("shape: ", test_data.shape, train_data.shape)   
         train_y = np.reshape(train_y.values,(-1,1))
         model =  tflearn.DNN(network, tensorboard_verbose=0)
         model.fit(train_data.values, train_y,  show_metric = True, batch_size=10)
