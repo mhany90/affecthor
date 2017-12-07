@@ -89,8 +89,13 @@ elif [ "$lexfile" = "S140-unigrams-pmilexicon_ar.txt" ]; then
     fields="2 4 5"
     header="[English Term]\tword\t[Sentiment Score]\tS140-posCount\tS140-negCount"
     field_sep="[\t]"
-fi
 
+elif [ "$lexfile" = "AFINN-emoticon-8.txt" ]; then
+    cp "${IFILE}" "${IFILE}.tmp"
+    fields="1 2"
+    header="word\tafinn-emoticon-score"
+    field_sep="[\t]"
+fi
 
 # extract and output
 sed -i "1s/^/${header}\n/" "${IFILE}.tmp"

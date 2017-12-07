@@ -18,6 +18,7 @@ if [ ! -d "$ARLEXDIR" ] || [ $newdata -eq 1 ]; then
     wget -q "http://saifmohammad.com/WebDocs/Arabic%20Lexicons/nrc_emotion_ar.txt"
     wget -q "http://saifmohammad.com/WebDocs/Arabic%20Lexicons/S140-unigrams-pmilexicon_ar.txt"
     wget -q "http://saifmohammad.com/WebDocs/Arabic%20Lexicons/NRC-HS-unigrams-pmilexicon_ar.txt"
+    cp ${AFINNDIR}/afinn/data/AFINN-emoticon-8.txt .
     popd > /dev/null
 
     echo '[INFO] Cleaning Arabic lexicons...'
@@ -93,6 +94,9 @@ if [ ! -d "$ESLEXDIR" ] || [ $newdata -eq 1 ]; then
     # warriner et al. (machine translated)
     wget -q "danigayo.info/downloads/Ratings_Warriner_et_al_Spanish.csv"
     mv "Ratings_Warriner_et_al_Spanish.csv" "warriner.txt"
+
+    # afinn emoticon lexicon
+    cp ${AFINNDIR}/afinn/data/AFINN-emoticon-8.txt .
 
     popd > /dev/null
 

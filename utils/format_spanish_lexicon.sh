@@ -47,5 +47,8 @@ elif [ "$lexfile" = "warriner.txt" ]; then
     sed -i '1d' $IFILE
     awk 'BEGIN { FS = "," } ; { print $3 "\t" $4 "\t" $7 "\t" $10}' $IFILE > $OFILE
     sed -i '1s/^/word\twarriner-valence\twarriner-arousal\twarriner-dominance\n/' $OFILE
+
+elif [ "$lexfile" = "AFINN-emoticon-8.txt" ]; then
+    sed "1s/^/word\tafinn-emoticon-score\n/" $IFILE > $OFILE
 fi
 

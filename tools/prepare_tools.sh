@@ -6,6 +6,8 @@ TWEETNLPDIR="$TOOLDIR/ark-tweet-nlp-0.3.2"
 
 EMOINTDIR="$TOOLDIR/EmoInt"
 
+AFINNDIR="$TOOLDIR/afinn"
+
 WEKADIR="$TOOLDIR/weka-3-9-1"
 
 
@@ -28,6 +30,12 @@ if [ ! -d "$EMOINTDIR" ] || [ $newtools -ge 1 ]; then
     git clone "https://github.com/felipebravom/EmoInt.git" "${EMOINTDIR}"
 fi
 
+# AFINN
+echo '[INFO] Preparing AFINN lexicon data...'
+if [ ! -d "$AFINNDIR" ] || [ $newtools -ge 1 ]; then
+    rm -rf $AFINNDIR
+    git clone "https://github.com/fnielsen/afinn.git" "${AFINNDIR}"
+fi
 
 # WEKA 3.9.1 (developer version)
 echo '[INFO] Preparing WEKA 3.9.1...'
