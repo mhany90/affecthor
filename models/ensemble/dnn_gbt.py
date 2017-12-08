@@ -129,7 +129,7 @@ for f in files:
         #GBT CORR.
         corr_gbt = pearsonr(predictions_gbt, test_y.values)
         print("Corr. GBT: ", corr_gbt[0])
-       	correlations_gbt.append(corr_dnn[0])
+       	correlations_gbt.append(corr_gbt[0])
 
 print("Mean Corr. of Avgeraged models: ", np.mean(correlations_avg))
 print("Mean Corr. of DNN: ", np.mean(correlations_dnn))
