@@ -6,7 +6,7 @@
 TASKS=("EI-reg" "EI-oc" "V-reg" "V-oc")
 
 # abbreviation for each language
-CODES=("En" "Ar" "Es")
+#CODES=("En" "Ar" "Es")
 
 # desired portions of the data (allowed: train, dev, test)
 SETS=("train" "dev" "test")
@@ -18,38 +18,43 @@ AFFECTS=("anger" "fear" "joy" "sadness")
 WEKADIR="$TOOLDIR/weka-3-9-1"
 
 # directories where to find lexicons
-ARLEXDIR=$SENTLEXDIR/${CODES[1]}
+#ARLEXDIR=$SENTLEXDIR/${CODES[1]}
 ESLEXDIR=$SENTLEXDIR/${CODES[2]}
 
 # directories where to find embeddings (@peregrine.hpc.rug.nl)
-EMBHOME_EN="/data/s3094723/embeddings/en"
-EMBHOME_AR="/data/s3094723/embeddings/ar"
+#EMBHOME_EN="/data/s3094723/embeddings/en"
+#EMBHOME_AR="/data/s3094723/embeddings/ar"
 EMBHOME_ES="/data/s3094723/embeddings/es"
 
 # word embeddings to apply (English)
-EMB_EN=("w2v.twitter.edinburgh10M.400d.csv.gz" "Googlenews_emb.reformatted.csv.gz"
-        "glove.twitter.27B.200d.reformated.txt.gz" "400M/w2v.400M.reformated.csv.gz")
-EMB_EN_EXT=("ed" "ggl" "glvt" "400m")
+#EMB_EN=("w2v.twitter.edinburgh10M.400d.csv.gz" "Googlenews_emb.reformatted.csv.gz"
+#        "glove.twitter.27B.200d.reformated.txt.gz" "400M/w2v.400M.reformated.csv.gz")
+#EMB_EN_EXT=("ed" "ggl" "glvt" "400m")
 
 # word embeddings to apply (Arabic)
-EMB_AR=("ar.wiki.reformated.csv.gz")
-EMB_AR_EXT=("wiki")
+#EMB_AR=("ar.wiki.reformated.csv.gz" "ar.tweets.reformated.csv.gz")
+#EMB_AR_EXT=("wiki" "tweets")
 
 # word embeddings to apply (Spanish)
-EMB_ES=("es.wiki.reformated.csv.gz")
-EMB_ES_EXT=("wiki")
+#EMB_ES=("es.wiki.reformated.csv.gz" "es.tweets.reformated.csv.gz")
+#EMB_ES_EXT=("wiki" "tweets")
 
 # number of words to concatenate when using embedding filters
-KWORDS_EN=25
-KWORDS_AR=25
+#KWORDS_EN=25
+#KWORDS_AR=25
 KWORDS_ES=25
 
 
 ################################################ EASY SETTINGS FOR TESTING ONLY
-#CODES=('Es')
-#TASKS=("EI-reg")
+CODES=("Es")
+#EMB_AR=("ar.tweets.reformated.csv.gz")
+EMB_ES=("es.tweets.reformated.csv.gz")
+#EMB_AR_EXT=("tweets")
+EMB_ES_EXT=("tweets")
+
+#TASKS=("EI-reg""EI-oc""V-reg""V-oc")
 #EMB_EN=("w2v.twitter.edinburgh10M.400d.csv.gz")
-#EMB_EN_EXT=("ed")
+#EMB_EN_EXT=("tweets")
 ################################################ COMMENT OUT WHEN SUBMITTING JOBS
 
 
