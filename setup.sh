@@ -97,3 +97,10 @@ if [ $stage -le 2 ]; then
     echo '[INFO] Finished feature filtering'
 fi
 
+
+# STAGE 3 - apply models
+#if [ $stage -le 3 ]; then
+#    echo '[INFO] Applying models...'
+#    . $MODELDIR/apply_models.sh
+#    echo '[INFO] Finished applying models'
+#fi
