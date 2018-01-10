@@ -1,5 +1,5 @@
 #!/bin/bash
-# this script converts a CSV file to ARFF
+# this script removes a certain field
 
 #SBATCH --time=00:10:00
 #SBATCH --mem=30GB

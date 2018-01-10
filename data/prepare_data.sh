@@ -17,8 +17,8 @@ LANGS=("English" "Arabic" "Spanish")
 # abbreviation for each language
 CODES=("En" "Ar" "Es")
 
-# desired portions of the data (allowed: train, dev, test)
-SETS=("train" "dev" "test")
+# desired portions of the data (allowed: train, dev, test, traindev)
+SETS=("train" "dev" "test" "traindev")
 
 # affects considered in subtasks of type EI
 AFFECTS=("anger" "fear" "joy" "sadness")

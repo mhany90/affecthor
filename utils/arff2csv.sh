@@ -1,5 +1,5 @@
 #!/bin/bash
-# this script converts a CSV file to ARFF
+# this script converts an ARFF file to CSV
 
 # Arguments:
 #  $1 : input file

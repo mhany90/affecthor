@@ -39,6 +39,15 @@ for (( t=0; t<${#TASKS[@]}; t++ )); do
         TRAIN_URL="${LOCAL_URL}/${LOCAL_FILE}-train.zip"
         DEV_URL="${LOCAL_URL}/${LOCAL_FILE}-dev.zip"
 
+        # test url depends on language
+        if [ $code == 'En' ]; then
+            TEST_URL="${URL_PREFIX}/AIT2018-TEST-DATA/semeval2018englishtestfiles/${LOCAL_FILE}-test.zip"
+        elif [ $code == 'Ar' ]; then
+            TEST_URL="${URL_PREFIX}/AIT2018-TEST-DATA/semeval2018arabictestfiles/${LOCAL_FILE}-test.zip"
+        elif [ $code == 'Es' ]; then
+            TEST_URL="${URL_PREFIX}/AIT2018-TEST-DATA/semeval2018spanishtestfiles/${LOCAL_FILE}-test.zip"
+        fi
+
         # process EI-reg / EI-oc tasks
         if [ $t -eq 0 ] || [ $t -eq 1 ]; then
             # irregular URL in (En, train)
@@ -49,6 +58,7 @@ for (( t=0; t<${#TASKS[@]}; t++ )); do
             # download and extract
             wget -q "${TRAIN_URL}"
             wget -q "${DEV_URL}"
+            wget -q "${TEST_URL}"
             unzip "*.zip"
 
             # clean irrelevant files
@@ -66,6 +76,13 @@ for (( t=0; t<${#TASKS[@]}; t++ )); do
                     fi
                 done
             done
+
+            # combine train and dev
+            mkdir -p "traindev"
+            for a in ${AFFECTS[@]}; do
+			          cp "train/$task-$code-$a-train.txt" "traindev/$task-$code-$a-traindev.txt"
+			          sed 1d "dev/$task-$code-$a-dev.txt" >> "traindev/$task-$code-$a-traindev.txt"
+            done
         fi
 
         # process V-reg / V-oc tasks
@@ -74,6 +91,7 @@ for (( t=0; t<${#TASKS[@]}; t++ )); do
             # download and extract
             wget -q "${TRAIN_URL}"
             wget -q "${DEV_URL}"
+            wget -q "${TEST_URL}"
             unzip "*.zip"
 
             # clean irrelevant files
@@ -86,6 +104,11 @@ for (( t=0; t<${#TASKS[@]}; t++ )); do
                     mv -f "${LOCAL_FILE}-$s.txt" "$s/$task-$code-valence-$s.txt"
                 fi
             done
+
+            # combine train and dev
+            mkdir -p "traindev"
+			      cp "train/$task-$code-valence-train.txt" "traindev/$task-$code-valence-traindev.txt"
+			      sed 1d "dev/$task-$code-valence-dev.txt" >> "traindev/$task-$code-valence-traindev.txt"
         fi
 
         popd > /dev/null
