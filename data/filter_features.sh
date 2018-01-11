@@ -26,10 +26,10 @@ EMBHOME_EN="/data/s3094723/embeddings/en"
 EMBHOME_AR="/data/s3094723/embeddings/ar"
 EMBHOME_ES="/data/s3094723/embeddings/es"
 
-# word embeddings to apply (English)
-EMB_EN=("w2v.twitter.edinburgh10M.400d.csv.gz" "Googlenews_emb.reformatted.csv.gz"
-        "glove.twitter.27B.200d.reformated.txt.gz" "400M/w2v.400M.reformated.csv.gz")
-EMB_EN_EXT=("ed" "ggl" "glvt" "400m")
+# word embeddings to apply (English / obsolete)
+#EMB_EN=("w2v.twitter.edinburgh10M.400d.csv.gz" "Googlenews_emb.reformatted.csv.gz"
+#        "glove.twitter.27B.200d.reformated.txt.gz" "400M/w2v.400M.reformated.csv.gz")
+#EMB_EN_EXT=("ed" "ggl" "glvt" "400m")
 
 # word embeddings to apply (Arabic)
 EMB_AR=("ar.wiki.reformated.csv.gz" "ar.tweets.reformated.csv.gz")
@@ -48,8 +48,8 @@ KWORDS_ES=25
 ################################################ EASY SETTINGS FOR TESTING ONLY
 #TASKS=("EI-reg")
 #CODES=("En")
-#EMB_EN=("w2v.twitter.edinburgh10M.400d.csv.gz")
-#EMB_EN_EXT=("ed")
+EMB_EN=("w2v.twitter.edinburgh10M.400d.csv.gz")
+EMB_EN_EXT=("ed")
 ################################################ COMMENT OUT WHEN SUBMITTING JOBS
 
 
