@@ -194,12 +194,12 @@ def make_cnn(word_index, max_seq):
     embedded_sequences = embedding_layer(sequence_input)
     embedded_sequences = GaussianNoise(0.01)(embedded_sequences)
 
-    x = Conv1D(250, 5, activation='relu')(embedded_sequences)
+    x = Conv1D(250, 3, activation='relu')(embedded_sequences)
     x = MaxPooling1D()(x)
     x = Flatten()(x)
     x = Dense(120, activation='relu')(x)
 #    x = Dropout(0.3)(x)
-    x = Dense(50, activation='relu')(x)
+    #x = Dense(50, activation='relu')(x)
     preds = Dense(1, activation='sigmoid')(x)
 
     return sequence_input, x, preds
@@ -238,42 +238,18 @@ def make_cnn_lstm(word_index , max_seq):
     embedded_sequences = embedding_layer(sequence_input)
 
     x = Reshape((-1, max_seq, embed_dim)) (embedded_sequences)
-    x = TimeDistributed(Conv1D(50, 3, activation='relu', padding='valid', kernel_initializer = lecun_normal(seed=None), input_shape=(1,max_seq, embed_dim)))(x)
-    x = TimeDistributed(MaxPooling1D())(x)
-    x = TimeDistributed(Flatten())(x)
-    x = LSTM(300, activation="relu", kernel_initializer = lecun_normal(seed=None))(x)
-    x = Dropout(0.3)(x)
-    x = Dense(150, activation='relu', kernel_initializer = lecun_normal(seed=None))(x)
-    x = Dense(75, activation='relu', kernel_initializer = lecun_normal(seed=None))(x)
-
-    preds = Dense(1, activation='sigmoid')(x)
-
-    return sequence_input, x, preds
-
-def make_cnn_lstm2(word_index, max_seq):
-    embeds, embed_dim = read_embeds(EFILE, word_index)
-
-    embedding_layer = Embedding(len(word_index) + 1,
-                            embed_dim,
-                            weights = [embeds],
-                            input_length=max_seq,
-                            trainable = False)
-
-    sequence_input = Input(shape=(max_seq,), dtype='int32')
-    embedded_sequences = embedding_layer(sequence_input)
-
-    x = Reshape((-1, max_seq, embed_dim)) (embedded_sequences)
     x = TimeDistributed(Conv1D(100, 3, activation='relu', padding='valid', kernel_initializer = lecun_normal(seed=None), input_shape=(1,max_seq, embed_dim)))(x)
     x = TimeDistributed(MaxPooling1D())(x)
     x = TimeDistributed(Flatten())(x)
     x = LSTM(300, activation="relu", kernel_initializer = lecun_normal(seed=None))(x)
-    x = Dropout(0.3)(x)
+    x = Dropout(0.2)(x)
     x = Dense(150, activation='relu', kernel_initializer = lecun_normal(seed=None))(x)
     x = Dense(75, activation='relu', kernel_initializer = lecun_normal(seed=None))(x)
 
     preds = Dense(1, activation='sigmoid')(x)
 
     return sequence_input, x, preds
+
 
 def cross_validate(feat_file, dev_feat_file, test_feat_file, tok_file, dev_tok_file, test_tok_file,  n_folds):
     print(feat_file)
@@ -345,10 +321,10 @@ def cross_validate(feat_file, dev_feat_file, test_feat_file, tok_file, dev_tok_f
 
         #fit all
         regr.fit(feat_train_x, train_y)
-        model_cnn_lstm.fit(seq_train_x, train_y, epochs=8, batch_size=4)
+        model_cnn_lstm.fit(seq_train_x, train_y, epochs=6, batch_size=4)
         model_dnn.fit(feat_train_x, train_y, epochs=8, batch_size=8)
-        model_char_lstm.fit([seq_train_x, char_train_x], train_y, epochs=8, batch_size=4)
-        model_cnn.fit(seq_train_x, train_y, epochs=8, batch_size=8)
+        model_char_lstm.fit([seq_train_x, char_train_x], train_y, epochs=6, batch_size=4)
+        model_cnn.fit(seq_train_x, train_y, epochs=6, batch_size=8)
 
      
         #pred all
@@ -379,7 +355,7 @@ def cross_validate(feat_file, dev_feat_file, test_feat_file, tok_file, dev_tok_f
         corrs_cnn.append(corr_cnn)
 
 
-        preds = np.mean([preds_dnn, preds_gbt,  preds_cnn_lstm, preds_cnn, preds_char_lstm], axis = 0)
+        preds = np.mean([preds_dnn, preds_gbt, preds_char_lstm], axis = 0)
         corr = pearson(test_y, preds)
         corrs.append(corr)
         print("Pearson correlation for fold:", corr)
