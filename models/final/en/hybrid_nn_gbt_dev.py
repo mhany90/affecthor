@@ -238,30 +238,13 @@ def make_cnn_LSTM4(word_index, max_seq):
 
     sequence_input = Input(shape=(max_seq,), dtype='int32')
     embedded_sequences = embedding_layer(sequence_input)
-    #embedded_sequences = GaussianNoise(0.02)(embedded_sequences)    
-    x = Bidirectional(LSTM(512, activation="relu", return_sequences=True))(embedded_sequences)
-    x = Bidirectional(LSTM(256, activation="relu", return_sequences=True))(x)
-    x = Bidirectional(LSTM(128, activation="relu", return_sequences=True))(x)
+    x = Bidirectional(LSTM(256, activation="relu", return_sequences=True))(embedded_sequences)
+ #   x = Bidirectional(LSTM(256, activation="relu", return_sequences=True))(x)
    
     x = AttentionWithContext()(x)
-    print(x.shape)
     x = Dropout(0.2)(x)
-
-    #x = Bidirectional(LSTM(64, activation="relu"))(x)
-   # x = Conv1D(50, 3, activation='relu')(x)
-   # x = AveragePooling1D()(x)
-    #x = Flatten()(x)
-    #x = Dense(1280, activation='relu')(x)
-   # x = Dropout(0.3)(x)
-   # x = Dense(600, activation='relu')(x)
-    #x = Dropout(0.2)(x)
-
-    #x = Dense(300, activation='relu')(x)
-    #x = Dropout(0.2)(x)
-
     x = Dense(150, activation='relu')(x)
     x = Dense(75, activation='relu')(x)
-
     preds = Dense(1, activation='sigmoid')(x)
 
     return sequence_input, x, preds
