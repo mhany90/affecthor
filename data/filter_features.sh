@@ -17,6 +17,9 @@ AFFECTS=("anger" "fear" "joy" "sadness")
 # weka directory
 WEKADIR="$TOOLDIR/weka-3-9-1"
 
+# sentiment lexicon directory
+SENTLEXDIR=$DATADIR/lexicons
+
 # directories where to find lexicons
 ARLEXDIR=$SENTLEXDIR/${CODES[1]}
 ESLEXDIR=$SENTLEXDIR/${CODES[2]}
