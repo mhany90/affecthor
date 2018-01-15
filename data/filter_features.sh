@@ -21,8 +21,8 @@ WEKADIR="$TOOLDIR/weka-3-9-1"
 SENTLEXDIR=$DATADIR/lexicons
 
 # directories where to find lexicons
-ARLEXDIR=$SENTLEXDIR/${CODES[1]}
-ESLEXDIR=$SENTLEXDIR/${CODES[2]}
+ARLEXDIR=$SENTLEXDIR/${CODES[0]}
+ESLEXDIR=$SENTLEXDIR/${CODES[1]}
 
 # directories where to find embeddings (@peregrine.hpc.rug.nl)
 EMBHOME_EN="/data/s3094723/embeddings/en"
