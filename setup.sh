@@ -3,7 +3,7 @@
 
 
 # resume training with option --stage N, -s N
-stage=0
+stage=2
 
 # install all tools again with option --install-tools, -t
 newtools=0
