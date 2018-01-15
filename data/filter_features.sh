@@ -32,11 +32,11 @@ EMBHOME_ES="/data/s3094723/embeddings/es"
 #EMB_EN_EXT=("ed" "ggl" "glvt" "400m")
 
 # word embeddings to apply (Arabic)
-EMB_AR=("ar.wiki.reformated.csv.gz" "ar.tweets.reformated.csv.gz")
+EMB_AR=("ar.tweets.reformated.csv.gz" "ar.tweets_two.reformated.csv.gz")
 EMB_AR_EXT=("tweets" "tweets_two")
 
 # word embeddings to apply (Spanish)
-EMB_ES=("es.wiki.reformated.csv.gz" "es.tweets.reformated.csv.gz")
+EMB_ES=("es.tweets.reformated.csv.gz" "es.tweets_two.reformated.csv.gz")
 EMB_ES_EXT=("tweets" "tweets_two")
 
 # number of words to concatenate when using embedding filters
