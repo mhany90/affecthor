@@ -6,7 +6,7 @@
 TASKS=("EI-reg" "EI-oc" "V-reg" "V-oc")
 
 # abbreviation for each language
-CODES=("En" "Ar" "Es")
+CODES=("Ar" "Es")
 
 # desired portions of the data (allowed: train, dev, test, traindev)
 SETS=("train" "dev" "test" "traindev")
@@ -17,9 +17,12 @@ AFFECTS=("anger" "fear" "joy" "sadness")
 # weka directory
 WEKADIR="$TOOLDIR/weka-3-9-1"
 
+# sentiment lexicon directory
+SENTLEXDIR=$DATADIR/lexicons
+
 # directories where to find lexicons
-ARLEXDIR=$SENTLEXDIR/${CODES[1]}
-ESLEXDIR=$SENTLEXDIR/${CODES[2]}
+ARLEXDIR=$SENTLEXDIR/${CODES[0]}
+ESLEXDIR=$SENTLEXDIR/${CODES[1]}
 
 # directories where to find embeddings (@peregrine.hpc.rug.nl)
 EMBHOME_EN="/data/s3094723/embeddings/en"
@@ -32,12 +35,12 @@ EMBHOME_ES="/data/s3094723/embeddings/es"
 #EMB_EN_EXT=("ed" "ggl" "glvt" "400m")
 
 # word embeddings to apply (Arabic)
-EMB_AR=("ar.wiki.reformated.csv.gz" "ar.tweets.reformated.csv.gz")
-EMB_AR_EXT=("wiki" "tweets")
+EMB_AR=("ar.tweets.reformated.csv.gz" "ar.tweets_two.reformated.csv.gz")
+EMB_AR_EXT=("tweets" "tweets_two")
 
 # word embeddings to apply (Spanish)
-EMB_ES=("es.wiki.reformated.csv.gz" "es.tweets.reformated.csv.gz")
-EMB_ES_EXT=("wiki" "tweets")
+EMB_ES=("es.tweets.reformated.csv.gz" "es.tweets_two.reformated.csv.gz")
+EMB_ES_EXT=("tweets" "tweets_two")
 
 # number of words to concatenate when using embedding filters
 KWORDS_EN=25
@@ -48,8 +51,8 @@ KWORDS_ES=25
 ################################################ EASY SETTINGS FOR TESTING ONLY
 #TASKS=("EI-reg")
 #CODES=("En")
-EMB_EN=("w2v.twitter.edinburgh10M.400d.csv.gz")
-EMB_EN_EXT=("ed")
+#EMB_EN=("w2v.twitter.edinburgh10M.400d.csv.gz")
+#EMB_EN_EXT=("ed")
 ################################################ COMMENT OUT WHEN SUBMITTING JOBS
 
 
