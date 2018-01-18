@@ -1,3 +1,5 @@
+from att import AttentionWithContext
+from att2 import Attention
 from collections import OrderedDict
 from collections import defaultdict
 from keras.initializers import lecun_normal
@@ -104,13 +106,14 @@ def make_char_lstm(word_index, char_index,  MAX_SEQ, MAX_WORD):
     y = Bidirectional(LSTM(50, activation="relu"))(y)
 
     merged = keras.layers.concatenate([x, y], axis=1)
+   # x = Dense(35, activation="relu", kernel_initializer = init)(merged) 
     preds = Dense(1, activation='sigmoid')(merged)
 
     return sequence_input, char_input, merged, preds
 #end char stuff
 
 def read_shuffle(f):
-    data = pd.read_csv(f, header=None)
+    data = pd.read_csv(f, header=None, skiprows = 1)
     return data
 
 #dev data and train data combined, test data seperate
@@ -165,19 +168,20 @@ init = 'TruncatedNormal'
 
 def make_dnn(input_shape):
     input = Input(shape=input_shape)
-    x = Dense(3000, activation="relu", kernel_initializer = init )(input)
+    x = Dense(300, activation="relu", kernel_initializer = init )(input)
     x = Dropout(0.2)(x)
-    x = Dense(1500, activation="relu", kernel_initializer = init)(x)
-    x = Dropout(0.2)(x)
-    x = Dense(750, activation="relu", kernel_initializer = init)(x)
-    #x = Dropout(0.2)(x)
-    x = Dense(350, activation="relu", kernel_initializer = init)(x)
-  #  x = Dropout(0.2)(x)
     x = Dense(150, activation="relu", kernel_initializer = init)(x)
+    x = Dropout(0.3)(x)
+    #x = Dense(75, activation="relu", kernel_initializer = init)(x)
+   # x = Dropout(0.2)(x)
+   # x = Dense(35, activation="relu", kernel_initializer = init)(x)
+  #  x = Dropout(0.2)(x)
+    #x = Dense(150, activation="relu", kernel_initializer = init)(x)
  #   x = Dropout(0.2)(x)
-    x = Dense(70, activation="relu", kernel_initializer = init)(x)
-    x = Dense(35, activation="relu", kernel_initializer = init)(x)
+#    x = Dense(10, activation="relu", kernel_initializer = init)(x)
     preds = Dense(1, activation="sigmoid", kernel_initializer = init)(x)
+
+    #return Model(inputs=inputs, outputs=preds)
 
     return input, x, preds
 
@@ -194,7 +198,7 @@ def make_cnn(word_index, max_seq):
     embedded_sequences = embedding_layer(sequence_input)
     embedded_sequences = GaussianNoise(0.01)(embedded_sequences)
 
-    x = Conv1D(250, 3, activation='relu')(embedded_sequences)
+    x = Conv1D(250, 5, activation='relu')(embedded_sequences)
     x = MaxPooling1D()(x)
     x = Flatten()(x)
     x = Dense(120, activation='relu')(x)
@@ -225,6 +229,32 @@ def make_lstm(word_index, max_seq):
 
     return sequence_input, x, preds
 
+
+def make_lstm2(word_index, max_seq):
+    embeds, embed_dim = read_embeds(EFILE, word_index)
+
+    embedding_layer = Embedding(len(word_index) + 1,
+                            embed_dim,
+                            weights = [embeds],
+                            input_length=max_seq,
+                            trainable = False)
+
+    sequence_input = Input(shape=(max_seq,), dtype='int32')
+    embedded_sequences = embedding_layer(sequence_input)
+    x = Bidirectional(LSTM(256, activation="relu", return_sequences=True))(embedded_sequences)
+    #x = LSTM(256, activation="relu", return_sequences=True, kernel_initializer = init)(embedded_sequences)
+    #x = Bidirectional(LSTM(100, activation="relu"))(x)
+    # x = Conv1D(100, 5, activation='relu', kernel_initializer = init)(embedded_sequences)
+    # x = MaxPooling1D()(x)
+    x = Flatten()(x)
+    # x = Dense(128, activation='relu')(x)
+    #x = Dropout(0.2)(x)
+    x = Dense(50, activation='relu')(x)
+    preds = Dense(1, activation='sigmoid')(x)
+
+    return sequence_input, x, preds
+
+
 def make_cnn_lstm(word_index , max_seq):
     embeds, embed_dim = read_embeds(EFILE, word_index)
 
@@ -251,11 +281,15 @@ def make_cnn_lstm(word_index , max_seq):
     return sequence_input, x, preds
 
 
-def cross_validate(feat_file, dev_feat_file, test_feat_file, tok_file, dev_tok_file, test_tok_file,  n_folds):
+def cross_validate(feat_file, feat_file_gbt, dev_feat_file,dev_feat_gbt_file, test_feat_file,test_feat_gbt_file, tok_file, dev_tok_file, test_tok_file,  n_folds, CV):
     print(feat_file)
     data = read_shuffle(feat_file)
     dev_data = read_shuffle(dev_feat_file)
     final_test_data = read_shuffle(test_feat_file)
+    data_gbt = read_shuffle(feat_file_gbt)
+    dev_gbt = read_shuffle(dev_feat_gbt_file)
+    final_test_data_gbt= read_shuffle(test_feat_gbt_file)
+   
 
     seq_data, char_data, word_index, char_index, max_seq, max_word, train_index = read_and_proc(tok_file, dev_tok_file, test_tok_file)
     #seq_data, word_index, max_seq = read_seqs(tok_file)
@@ -263,11 +297,12 @@ def cross_validate(feat_file, dev_feat_file, test_feat_file, tok_file, dev_tok_f
 
     kf = KFold(n_splits=n_folds)
     corrs = []
-    corrs_dnn, corrs_cnn_lstm, corrs_gbt, corrs_cnn, corrs_char_lstm = [], [], [], [], []
+    corrs_dnn, corrs_cnn_lstm, corrs_gbt, corrs_cnn, corrs_char_lstm, corrs_lstm = [], [], [], [], [], []
 
     #sent and lex train data
     #combine dev and train sent.lex
     data = data.append(dev_data, ignore_index=True)
+    data_gbt =  data_gbt.append(dev_gbt, ignore_index=True) 
     #char and seq train data (remove test data)
     print("Seq then char data: ", seq_data.shape, char_data.shape)
     seq_train = seq_data[:train_index,]
@@ -279,23 +314,35 @@ def cross_validate(feat_file, dev_feat_file, test_feat_file, tok_file, dev_tok_f
         print("index test: " ,test[0],":",test[-1])
         train_data = data.iloc[train,:]
         test_data = data.iloc[test,:]
+        train_data_gbt = data_gbt.iloc[train,:]
+        test_data_gbt = data_gbt.iloc[test,:]
         #cv train
-        feat_train_x = train_data.drop(train_data.columns[0], axis=1).values
+        cols = [0,1]
+        feat_train_x = train_data.drop(train_data.columns[cols], axis=1).values
+        feat_train_x_gbt = train_data_gbt.drop(train_data_gbt.columns[cols], axis=1).values
         seq_train_x = seq_train[train]
         char_train_x = char_train[train]
-        train_y = train_data.iloc[:,0].values
+        train_y = train_data.iloc[:,1].values
         #cv test
-        feat_test_x = test_data.drop(test_data.columns[0], axis=1).values
+        cols = [0,1]
+        feat_test_x = test_data.drop(test_data.columns[cols], axis=1).values
+        feat_test_x_gbt = test_data_gbt.drop(test_data_gbt.columns[cols], axis=1).values
         seq_test_x = seq_train[test]
        	char_test_x = char_train[test]
-        test_y = test_data.iloc[:,0].values
-        
+        test_y = test_data.iloc[:,1].values
         #optim.
         adam = optimizers.Adam(lr = 0.001)
+
         #dense
         dense_input, dnn, dnn_preds = make_dnn((feat_train_x.shape[1],))
         model_dnn = Model(inputs=dense_input, outputs=dnn_preds)
         model_dnn.compile(loss='mse',
+                      optimizer=adam)
+
+        #lstm
+        seq_input, lstm, lstm_preds= make_lstm2(word_index, max_seq)
+        model_lstm = Model(inputs=seq_input, outputs=lstm_preds)
+        model_lstm.compile(loss='mse',
                       optimizer=adam)
 
         #char_lstm (seq input gets overwritten)
@@ -318,101 +365,125 @@ def cross_validate(feat_file, dev_feat_file, test_feat_file, tok_file, dev_tok_f
         #regr
         regr = GradientBoostingRegressor(max_depth=3,n_estimators=450, learning_rate = 0.05,subsample=0.9, max_leaf_nodes=37000)
 
+        if CV:
+            #fit all
+            regr.fit(feat_train_x_gbt, train_y)
+            model_cnn_lstm.fit(seq_train_x, train_y, epochs=6, batch_size=4, verbose = 1)
+            model_dnn.fit(feat_train_x, train_y, epochs=8, batch_size=8, verbose = 1)
+            model_char_lstm.fit([seq_train_x, char_train_x], train_y, epochs=6, batch_size=4, verbose = 1)
+            model_lstm.fit(seq_train_x, train_y, epochs=6, batch_size=8, verbose = 1)
 
-        #fit all
-        regr.fit(feat_train_x, train_y)
-        model_cnn_lstm.fit(seq_train_x, train_y, epochs=6, batch_size=4)
-        model_dnn.fit(feat_train_x, train_y, epochs=8, batch_size=8)
-        model_char_lstm.fit([seq_train_x, char_train_x], train_y, epochs=6, batch_size=4)
-        model_cnn.fit(seq_train_x, train_y, epochs=6, batch_size=8)
-
-     
-        #pred all
-        preds_dnn = model_dnn.predict(feat_test_x).flatten()
-        preds_cnn_lstm = model_cnn_lstm.predict(seq_test_x).flatten()
-        preds_gbt = regr.predict(feat_test_x)
-        preds_char_lstm = model_char_lstm.predict([seq_test_x, char_test_x]).flatten()
-        preds_cnn = model_cnn.predict(seq_test_x).flatten()
- 
- 
-        corr_dnn = pearson(test_y, preds_dnn)
-        corr_cnn_lstm = pearson(test_y, preds_cnn_lstm)
-        corr_char_lstm = pearson(test_y, preds_char_lstm)
-        corr_gbt = pearson(test_y, preds_gbt)
-        corr_cnn = pearson(test_y, preds_cnn)
-
-        print("Pearson correlation for fold DNN: ", corr_dnn)
-        print("Pearson correlation for fold CNN_LSTM: ", corr_cnn_lstm)
-        print("Pearson correlation for fold GBT: ", corr_gbt)
-        print("Pearson correlation for fold CNN: ", corr_cnn)
-        print("Pearson correlation for fold CHAR_LSTM:", corr_char_lstm)
+            #pred all
+            preds_dnn = model_dnn.predict(feat_test_x).flatten()
+            preds_cnn_lstm = model_cnn_lstm.predict(seq_test_x).flatten()
+            preds_gbt = regr.predict(feat_test_x_gbt)
+            preds_char_lstm = model_char_lstm.predict([seq_test_x, char_test_x]).flatten()
+            preds_lstm = model_lstm.predict(seq_test_x).flatten()
 
 
-        corrs_dnn.append(corr_dnn)
-        corrs_cnn_lstm.append(corr_cnn_lstm)
-        corrs_gbt.append(corr_gbt)
-        corrs_char_lstm.append(corr_char_lstm)
-        corrs_cnn.append(corr_cnn)
+            corr_dnn = pearson(test_y, preds_dnn)
+            corr_cnn_lstm = pearson(test_y, preds_cnn_lstm)
+            corr_char_lstm = pearson(test_y, preds_char_lstm)
+            corr_gbt = pearson(test_y, preds_gbt)
+            corr_lstm = pearson(test_y, preds_lstm)
 
+            print("Pearson correlation for fold DNN: ", corr_dnn)
+            print("Pearson correlation for fold CNN_LSTM: ", corr_cnn_lstm)
+            print("Pearson correlation for fold GBT: ", corr_gbt)
+            print("Pearson correlation for fold lstm: ", corr_lstm)
+            print("Pearson correlation for fold CHAR_LSTM:", corr_char_lstm)
 
-        preds = np.mean([preds_dnn, preds_gbt, preds_char_lstm], axis = 0)
-        corr = pearson(test_y, preds)
-        corrs.append(corr)
-        print("Pearson correlation for fold:", corr)
+            corrs_dnn.append(corr_dnn)
+            corrs_cnn_lstm.append(corr_cnn_lstm)
+            corrs_gbt.append(corr_gbt)
+            corrs_char_lstm.append(corr_char_lstm)
+            corrs_lstm.append(corr_lstm)
 
+            preds = np.mean([ preds_dnn, preds_cnn_lstm, preds_gbt, preds_char_lstm, preds_lstm ], axis = 0)
+            corr = pearson(test_y, preds)
+            corrs.append(corr)
+            print("Pearson correlation for fold:", corr)
 
+    if CV:
+        mean_dnn = float(np.mean(corrs_dnn))
+        mean_cnn_lstm = float(np.mean(corrs_cnn_lstm))
+        mean_gbt = float(np.mean(corrs_gbt))
+        mean_lstm = float(np.mean(corrs_lstm))
+        mean_char_lstm =  float(np.mean(corrs_char_lstm))
 
-    mean_dnn = float(np.mean(corrs_dnn))
-    mean_cnn_lstm = float(np.mean(corrs_cnn_lstm))
-    mean_gbt = float(np.mean(corrs_gbt))
-    mean_cnn = float(np.mean(corrs_cnn))
-    mean_char_lstm =  float(np.mean(corrs_char_lstm))
+        #rank systems
+        systems = {'preds_dnn':mean_dnn, 'preds_cnn_lstm':mean_cnn_lstm, 'preds_gbt':mean_gbt, 'preds_lstm':mean_lstm, 'preds_char_lstm':mean_char_lstm}
+        print(systems)
+        sys_ranking = [k for k in sorted(systems, key=systems.get, reverse = True)]
+        top_systems  = sys_ranking[:3]
 
-    #rank systems
-    systems = {'preds_dnn':mean_dnn, 'preds_cnn_lstm':mean_cnn_lstm, 'preds_gbt':mean_gbt, 'preds_cnn':mean_cnn, 'preds_char_lstm':mean_char_lstm}
-    print(systems)
-    sys_ranking = [k for k in sorted(systems, key=systems.get, reverse = True)]
-    top_systems  = sys_ranking[:3]
+        print("Average Pearson correlation AVG:", np.mean(corrs))
+        print("Average Pearson correlation DNN:", np.mean(corrs_dnn))
+        print("Average Pearson correlation CNN_LSTM:", np.mean(corrs_cnn_lstm))
+        print("Average Pearson correlation GBT:", np.mean(corrs_gbt))
+        print("Average Pearson correlation LSTM:", np.mean(corrs_lstm))
+        print("Average Pearson correlation CHAR_LSTN:", np.mean(corrs_char_lstm))
 
-    print("Average Pearson correlation AVG:", np.mean(corrs))
-    print("Average Pearson correlation DNN:", np.mean(corrs_dnn)) 
-    print("Average Pearson correlation CNN_LSTM:", np.mean(corrs_cnn_lstm))
-    print("Average Pearson correlation GBT:", np.mean(corrs_gbt))
-    print("Average Pearson correlation CNN:", np.mean(corrs_cnn))
-    print("Average Pearson correlation CHAR_LSTN:", np.mean(corrs_char_lstm))
+        print("Best systems: ", top_systems)
+    else:
+        top_systems = ['preds_lstm', 'preds_dnn', 'preds_gbt' ]
+        top_systems = ['preds_lstm', 'preds_char_lstm']
+        print("Best systems (no CV): ", top_systems)
 
-    print("Best systems: ", top_systems)
-
-    #final test 
+    #final test
     #fit all again on full train_dev set
     #prepare data
     #final train
-    feat_train_x = data.drop(data.columns[0], axis=1).values
-    train_y = data.iloc[:,0].values
+    feat_train_x = data.drop(data.columns[cols], axis=1).values
+    feat_train_x_gbt = data_gbt.drop(data_gbt.columns[cols], axis=1).values
+    train_y = data.iloc[:,1].values
     #final test
-    feat_test_x = final_test_data.drop(final_test_data.columns[0], axis=1).values
+    feat_test_x = final_test_data.drop(final_test_data.columns[cols], axis=1).values
+    feat_test_x_gbt = final_test_data_gbt.drop(final_test_data_gbt.columns[cols], axis=1).values
     final_seq_test_x = seq_data[train_index:,]
     final_char_test_x = char_data[train_index:,]
 
-    #fit all again
-    regr.fit(feat_train_x, train_y)
-    model_cnn_lstm.fit(seq_train, train_y, epochs=8, batch_size=4)
-    model_dnn.fit(feat_train_x, train_y, epochs=8, batch_size=8)
-    model_char_lstm.fit([seq_train, char_train], train_y, epochs=6, batch_size=4)
-    model_cnn.fit(seq_train, train_y, epochs=6, batch_size=8)
+    #run x times and use average
+    run_times = 4
+    all_dnn, all_cnn_lstm, all_char_lstm, all_gbt, all_lstm = [],[],[],[],[]
 
-    #pred all
-    preds_dnn = model_dnn.predict(feat_test_x).flatten()
-    preds_cnn_lstm = model_cnn_lstm.predict(final_seq_test_x).flatten()
-    preds_gbt = regr.predict(feat_test_x)
-    preds_char_lstm = model_char_lstm.predict([final_seq_test_x, final_char_test_x]).flatten()
-    preds_cnn = model_cnn.predict(final_seq_test_x).flatten()
+    for x in range(1, run_times):
+        print("run: ", x)
+        #fit all again
+        regr.fit(feat_train_x_gbt, train_y)
+        model_cnn_lstm.fit(seq_train, train_y, epochs=8, batch_size=4, verbose = 1)
+        model_dnn.fit(feat_train_x, train_y, epochs=8, batch_size=8, verbose = 1)
+        model_char_lstm.fit([seq_train, char_train], train_y, epochs=6, batch_size=4, verbose = 1)
+        model_lstm.fit(seq_train, train_y, epochs=6, batch_size=8, verbose = 1)
+
+        #pred all
+        preds_dnn = model_dnn.predict(feat_test_x).flatten()
+        preds_cnn_lstm = model_cnn_lstm.predict(final_seq_test_x).flatten()
+        preds_gbt = regr.predict(feat_test_x_gbt)
+        preds_char_lstm = model_char_lstm.predict([final_seq_test_x, final_char_test_x]).flatten()
+        preds_lstm = model_lstm.predict(final_seq_test_x).flatten()
+
+        #add to list
+        all_dnn.append(preds_dnn)
+        all_cnn_lstm.append(preds_cnn_lstm)
+        all_gbt.append(preds_gbt)
+        all_char_lstm.append(preds_char_lstm)
+        all_lstm.append(preds_lstm)
+
+    #get avg
+    preds_dnn = np.mean(all_dnn,  axis = 0)
+    preds_cnn_lstm = np.mean(all_cnn_lstm,  axis = 0)
+    preds_gbt = np.mean(all_gbt,  axis = 0)
+    preds_char_lstm = np.mean(all_char_lstm, axis = 0)
+    preds_lstm = np.mean(all_lstm, axis = 0)
 
     #use best systems from CV
-    all = defaultdict(list) 
-    all = {'preds_dnn':preds_dnn, 'preds_cnn_lstm':preds_cnn_lstm, 'preds_gbt':preds_gbt, 'preds_cnn':preds_cnn, 'preds_char_lstm':preds_char_lstm}
-    best = [value for key, value in all.items() if key in top_systems]
+    all = defaultdict(list)
+    #all = {'preds_dnn':preds_dnn, 'preds_cnn_lstm':preds_cnn_lstm, 'preds_gbt':preds_gbt, 'preds_lstm':preds_lstm, 'preds_char_lstm':preds_char_lstm}
+    all = {'preds_lstm':preds_lstm, 'preds_char_lstm':preds_char_lstm}
 
+    best = [value for key, value in all.items() if key in top_systems]
+    print(best)
     preds = np.mean(best, axis = 0)
     #preds = np.mean([preds_dnn, preds_gbt,  preds_cnn_lstm, preds_cnn,  preds_char_lstm], axis = 0)
 
@@ -433,15 +504,27 @@ def cross_validate(feat_file, dev_feat_file, test_feat_file, tok_file, dev_tok_f
     format.close()
 
 
-EFILE = "/data/s3094723/embeddings/en/w2v.twitter.edinburgh10M.400d.csv"
-feat_file = "/data/s3094723/extra_features/EI-reg/EI-reg-En-fear-train.txt.sent.lex"
-tok_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/En/train/EI-reg-En-fear-train.tok"
-dev_feat_file = '/data/s3094723/extra_features/EI-reg/EI-reg-En-fear-dev.tok.sent.lex'
-dev_tok_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/En/dev/EI-reg-En-fear-dev.tok"
-test_feat_file = '/data/s3094723/extra_features/EI-reg/EI-reg-En-fear-test.tok.sent.lex'
-test_tok_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/En/test/EI-reg-En-fear-test.tok"
-format_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/En/test/EI-reg-En-fear-test.txt"
-out_file = format_file + '.scores'
+EFILE = "/data/s3094723/embeddings/es/es.tweets_two.reformated.csv"
+feat_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/train/features/EI-reg-Es-fear-train.emb.tweets_two.csv"
 
-cross_validate(feat_file, dev_feat_file, test_feat_file, tok_file, dev_tok_file, test_tok_file, 5)
+feat_file_gbt = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/train/features/EI-reg-Es-fear-train.combined.tweets_two.csv"
+
+tok_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/train/EI-reg-Es-fear-train.tok"
+
+dev_feat_file = '/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/dev/features/EI-reg-Es-fear-dev.emb.tweets_two.csv'
+
+dev_feat_gbt_file = '/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/dev/features/EI-reg-Es-fear-dev.combined.tweets_two.csv'
+
+dev_tok_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/dev/EI-reg-Es-fear-dev.tok"
+test_feat_file = '/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/test/features/EI-reg-Es-fear-test.emb.tweets_two.csv'
+
+test_feat_gbt_file = '/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/test/features/EI-reg-Es-fear-test.combined.tweets_two.csv'
+
+test_tok_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/test/EI-reg-Es-fear-test.tok"
+format_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/test/EI-reg-Es-fear-test.txt"
+out_file = '/home/s3479307/testing/scores/EI-reg-Es-fear-test.txt.scores'
+
+CV = True
+
+cross_validate(feat_file,feat_file_gbt,  dev_feat_file, dev_feat_gbt_file, test_feat_file,test_feat_gbt_file, tok_file, dev_tok_file, test_tok_file, 2, CV)
 

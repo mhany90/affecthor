@@ -505,24 +505,24 @@ def cross_validate(feat_file, feat_file_gbt, dev_feat_file,dev_feat_gbt_file, te
 
 
 EFILE = "/data/s3094723/embeddings/es/es.tweets_two.reformated.csv"
-feat_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/train/features/EI-reg-Es-anger-train.emb.tweets_two.csv"
+feat_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/train/features/EI-reg-Es-joy-train.emb.tweets_two.csv"
 
-feat_file_gbt = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/train/features/EI-reg-Es-anger-train.combined.tweets_two.csv"
+feat_file_gbt = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/train/features/EI-reg-Es-joy-train.combined.tweets_two.csv"
 
-tok_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/train/EI-reg-Es-anger-train.tok"
+tok_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/train/EI-reg-Es-joy-train.tok"
 
-dev_feat_file = '/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/dev/features/EI-reg-Es-anger-dev.emb.tweets_two.csv'
+dev_feat_file = '/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/dev/features/EI-reg-Es-joy-dev.emb.tweets_two.csv'
 
-dev_feat_gbt_file = '/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/dev/features/EI-reg-Es-anger-dev.combined.tweets_two.csv'
+dev_feat_gbt_file = '/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/dev/features/EI-reg-Es-joy-dev.combined.tweets_two.csv'
 
-dev_tok_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/dev/EI-reg-Es-anger-dev.tok"
-test_feat_file = '/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/test/features/EI-reg-Es-anger-test.emb.tweets_two.csv'
+dev_tok_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/dev/EI-reg-Es-joy-dev.tok"
+test_feat_file = '/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/test/features/EI-reg-Es-joy-test.emb.tweets_two.csv'
 
-test_feat_gbt_file = '/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/test/features/EI-reg-Es-anger-test.combined.tweets_two.csv'
+test_feat_gbt_file = '/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/test/features/EI-reg-Es-joy-test.combined.tweets_two.csv'
 
-test_tok_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/test/EI-reg-Es-anger-test.tok"
-format_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/test/EI-reg-Es-anger-test.txt"
-out_file = '/home/s3479307/testing/scores/EI-reg-Es-anger-test.txt.scores'
+test_tok_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/test/EI-reg-Es-joy-test.tok"
+format_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/test/EI-reg-Es-joy-test.txt"
+out_file = '/home/s3479307/testing/scores/EI-reg-Es-joy-test.txt.scores'
 
 CV = True
 
