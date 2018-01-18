@@ -72,7 +72,7 @@ def read_and_proc(f, fdev, ftest):
     tokenizer.fit_on_texts(tweets)
     sequences = tokenizer.texts_to_sequences(tweets)
     word_index = tokenizer.word_index
-    max_seq = len(max(sequences, key=len)) + 12
+    max_seq = len(max(sequences, key=len)) + 8
 
     padded = pad_sequences(sequences, maxlen=max_seq)
     chars, char_index, max_word = proc_chars(tweets, max_seq)
@@ -222,9 +222,9 @@ def make_lstm(word_index, max_seq):
     x = Bidirectional(LSTM(256, activation="relu", return_sequences=True))(embedded_sequences)
  #   x = Bidirectional(LSTM(256, activation="relu", return_sequences=True))(x)
     x = AttentionWithContext()(x)
-    x = Dropout(0.2)(x)
+    x = Dropout(0.1)(x)
     x = Dense(150, activation='relu')(x)
-    x = Dense(75, activation='relu')(x)
+    x = Dense(50, activation='relu')(x)
     preds = Dense(1, activation='sigmoid')(x)
 
     return sequence_input, x, preds
@@ -297,7 +297,7 @@ def cross_validate(feat_file, feat_file_gbt, dev_feat_file,dev_feat_gbt_file, te
 
     kf = KFold(n_splits=n_folds)
     corrs = []
-    corrs_dnn, corrs_cnn_lstm, corrs_gbt, corrs_cnn, corrs_char_lstm, corrs_lstm = [], [], [], [], [], []
+    corrs_dnn, corrs_cnn_lstm, corrs_gbt, corrs_lstm2, corrs_char_lstm, corrs_lstm = [], [], [], [], [], []
 
     #sent and lex train data
     #combine dev and train sent.lex
@@ -340,9 +340,16 @@ def cross_validate(feat_file, feat_file_gbt, dev_feat_file,dev_feat_gbt_file, te
                       optimizer=adam)
 
         #lstm
-        seq_input, lstm, lstm_preds= make_lstm2(word_index, max_seq)
+        seq_input, lstm, lstm_preds= make_lstm(word_index, max_seq)
         model_lstm = Model(inputs=seq_input, outputs=lstm_preds)
         model_lstm.compile(loss='mse',
+                      optimizer=adam)
+
+
+        #lstm2
+        seq_input2, lstm2, lstm_preds2= make_lstm2(word_index, max_seq)
+        model_lstm2 = Model(inputs=seq_input2, outputs=lstm_preds2)
+        model_lstm2.compile(loss='mse',
                       optimizer=adam)
 
         #char_lstm (seq input gets overwritten)
@@ -367,39 +374,42 @@ def cross_validate(feat_file, feat_file_gbt, dev_feat_file,dev_feat_gbt_file, te
 
         if CV:
             #fit all
-            regr.fit(feat_train_x_gbt, train_y)
+           # regr.fit(feat_train_x_gbt, train_y)
             model_cnn_lstm.fit(seq_train_x, train_y, epochs=6, batch_size=4, verbose = 1)
             model_dnn.fit(feat_train_x, train_y, epochs=8, batch_size=8, verbose = 1)
             model_char_lstm.fit([seq_train_x, char_train_x], train_y, epochs=6, batch_size=4, verbose = 1)
             model_lstm.fit(seq_train_x, train_y, epochs=6, batch_size=8, verbose = 1)
-
+            model_lstm2.fit(seq_train_x, train_y, epochs=6, batch_size=8, verbose = 1)
             #pred all
             preds_dnn = model_dnn.predict(feat_test_x).flatten()
             preds_cnn_lstm = model_cnn_lstm.predict(seq_test_x).flatten()
-            preds_gbt = regr.predict(feat_test_x_gbt)
+           # preds_gbt = regr.predict(feat_test_x_gbt)
             preds_char_lstm = model_char_lstm.predict([seq_test_x, char_test_x]).flatten()
             preds_lstm = model_lstm.predict(seq_test_x).flatten()
-
+            preds_lstm2 = model_lstm2.predict(seq_test_x).flatten()
 
             corr_dnn = pearson(test_y, preds_dnn)
             corr_cnn_lstm = pearson(test_y, preds_cnn_lstm)
             corr_char_lstm = pearson(test_y, preds_char_lstm)
-            corr_gbt = pearson(test_y, preds_gbt)
+           # corr_gbt = pearson(test_y, preds_gbt)
             corr_lstm = pearson(test_y, preds_lstm)
+            corr_lstm2 = pearson(test_y, preds_lstm2)
 
             print("Pearson correlation for fold DNN: ", corr_dnn)
             print("Pearson correlation for fold CNN_LSTM: ", corr_cnn_lstm)
-            print("Pearson correlation for fold GBT: ", corr_gbt)
+           # print("Pearson correlation for fold GBT: ", corr_gbt)
             print("Pearson correlation for fold lstm: ", corr_lstm)
             print("Pearson correlation for fold CHAR_LSTM:", corr_char_lstm)
+            print("Pearson correlation for fold lstm 2: ", corr_lstm2)            
 
             corrs_dnn.append(corr_dnn)
             corrs_cnn_lstm.append(corr_cnn_lstm)
-            corrs_gbt.append(corr_gbt)
+            #corrs_gbt.append(corr_gbt)
             corrs_char_lstm.append(corr_char_lstm)
             corrs_lstm.append(corr_lstm)
+            corrs_lstm2.append(corr_lstm2)
 
-            preds = np.mean([ preds_dnn, preds_cnn_lstm, preds_gbt, preds_char_lstm, preds_lstm ], axis = 0)
+            preds = np.mean([ preds_lstm2 , preds_char_lstm, preds_lstm ], axis = 0)
             corr = pearson(test_y, preds)
             corrs.append(corr)
             print("Pearson correlation for fold:", corr)
@@ -409,10 +419,11 @@ def cross_validate(feat_file, feat_file_gbt, dev_feat_file,dev_feat_gbt_file, te
         mean_cnn_lstm = float(np.mean(corrs_cnn_lstm))
         mean_gbt = float(np.mean(corrs_gbt))
         mean_lstm = float(np.mean(corrs_lstm))
+        mean_lstm2 = float(np.mean(corrs_lstm2))
         mean_char_lstm =  float(np.mean(corrs_char_lstm))
 
         #rank systems
-        systems = {'preds_dnn':mean_dnn, 'preds_cnn_lstm':mean_cnn_lstm, 'preds_gbt':mean_gbt, 'preds_lstm':mean_lstm, 'preds_char_lstm':mean_char_lstm}
+        systems = {'preds_dnn':mean_dnn, 'preds_cnn_lstm':mean_cnn_lstm, 'preds_gbt':mean_gbt, 'preds_lstm':mean_lstm, 'preds_char_lstm':mean_char_lstm, 'preds_lstm2':mean_lstm}
         print(systems)
         sys_ranking = [k for k in sorted(systems, key=systems.get, reverse = True)]
         top_systems  = sys_ranking[:3]
@@ -420,14 +431,15 @@ def cross_validate(feat_file, feat_file_gbt, dev_feat_file,dev_feat_gbt_file, te
         print("Average Pearson correlation AVG:", np.mean(corrs))
         print("Average Pearson correlation DNN:", np.mean(corrs_dnn))
         print("Average Pearson correlation CNN_LSTM:", np.mean(corrs_cnn_lstm))
-        print("Average Pearson correlation GBT:", np.mean(corrs_gbt))
+      #  print("Average Pearson correlation GBT:", np.mean(corrs_gbt))
         print("Average Pearson correlation LSTM:", np.mean(corrs_lstm))
         print("Average Pearson correlation CHAR_LSTN:", np.mean(corrs_char_lstm))
+        print("Average Pearson correlation LSTM 2:", np.mean(corrs_lstm2))
 
         print("Best systems: ", top_systems)
     else:
-        top_systems = ['preds_lstm', 'preds_dnn', 'preds_gbt' ]
-        top_systems = ['preds_lstm', 'preds_char_lstm']
+        #top_systems = ['preds_lstm', 'preds_dnn', 'preds_gbt' ]
+        top_systems = ['preds_lstm', 'preds_char_lstm', 'preds_lstm2']
         print("Best systems (no CV): ", top_systems)
 
     #final test
@@ -445,7 +457,7 @@ def cross_validate(feat_file, feat_file_gbt, dev_feat_file,dev_feat_gbt_file, te
 
     #run x times and use average
     run_times = 4
-    all_dnn, all_cnn_lstm, all_char_lstm, all_gbt, all_lstm = [],[],[],[],[]
+    all_dnn, all_cnn_lstm, all_char_lstm, all_gbt, all_lstm , all_lstm2= [],[],[],[],[],[]
 
     for x in range(1, run_times):
         print("run: ", x)
@@ -454,7 +466,8 @@ def cross_validate(feat_file, feat_file_gbt, dev_feat_file,dev_feat_gbt_file, te
         model_cnn_lstm.fit(seq_train, train_y, epochs=8, batch_size=4, verbose = 1)
         model_dnn.fit(feat_train_x, train_y, epochs=8, batch_size=8, verbose = 1)
         model_char_lstm.fit([seq_train, char_train], train_y, epochs=6, batch_size=4, verbose = 1)
-        model_lstm.fit(seq_train, train_y, epochs=6, batch_size=8, verbose = 1)
+        model_lstm.fit(seq_train, train_y, epochs=6, batch_size=6, verbose = 1)
+        model_lstm2.fit(seq_train, train_y, epochs=6, batch_size=6, verbose = 1)
 
         #pred all
         preds_dnn = model_dnn.predict(feat_test_x).flatten()
@@ -462,6 +475,7 @@ def cross_validate(feat_file, feat_file_gbt, dev_feat_file,dev_feat_gbt_file, te
         preds_gbt = regr.predict(feat_test_x_gbt)
         preds_char_lstm = model_char_lstm.predict([final_seq_test_x, final_char_test_x]).flatten()
         preds_lstm = model_lstm.predict(final_seq_test_x).flatten()
+        preds_lstm2 = model_lstm2.predict(final_seq_test_x).flatten()
 
         #add to list
         all_dnn.append(preds_dnn)
@@ -469,6 +483,7 @@ def cross_validate(feat_file, feat_file_gbt, dev_feat_file,dev_feat_gbt_file, te
         all_gbt.append(preds_gbt)
         all_char_lstm.append(preds_char_lstm)
         all_lstm.append(preds_lstm)
+        all_lstm2.append(preds_lstm2)
 
     #get avg
     preds_dnn = np.mean(all_dnn,  axis = 0)
@@ -476,11 +491,12 @@ def cross_validate(feat_file, feat_file_gbt, dev_feat_file,dev_feat_gbt_file, te
     preds_gbt = np.mean(all_gbt,  axis = 0)
     preds_char_lstm = np.mean(all_char_lstm, axis = 0)
     preds_lstm = np.mean(all_lstm, axis = 0)
+    preds_lstm2 = np.mean(all_lstm2, axis = 0) 
 
     #use best systems from CV
     all = defaultdict(list)
     #all = {'preds_dnn':preds_dnn, 'preds_cnn_lstm':preds_cnn_lstm, 'preds_gbt':preds_gbt, 'preds_lstm':preds_lstm, 'preds_char_lstm':preds_char_lstm}
-    all = {'preds_lstm':preds_lstm, 'preds_char_lstm':preds_char_lstm}
+    all = {'preds_lstm':preds_lstm, 'preds_char_lstm':preds_char_lstm, 'preds_lstm2':preds_lstm2}
 
     best = [value for key, value in all.items() if key in top_systems]
     print(best)
@@ -524,7 +540,7 @@ test_tok_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/test/EI-reg-Es-
 format_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/Es/test/EI-reg-Es-fear-test.txt"
 out_file = '/home/s3479307/testing/scores/EI-reg-Es-fear-test.txt.scores'
 
-CV = True
+CV = False
 
-cross_validate(feat_file,feat_file_gbt,  dev_feat_file, dev_feat_gbt_file, test_feat_file,test_feat_gbt_file, tok_file, dev_tok_file, test_tok_file, 2, CV)
+cross_validate(feat_file,feat_file_gbt,  dev_feat_file, dev_feat_gbt_file, test_feat_file,test_feat_gbt_file, tok_file, dev_tok_file, test_tok_file, 5, CV)
 
