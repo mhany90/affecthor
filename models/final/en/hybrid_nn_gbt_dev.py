@@ -251,8 +251,9 @@ def make_cnn_LSTM4(word_index, max_seq):
 
 
 def cross_validate(feat_file, tok_file, dev_file, dev_tok_file):
-    print(feat_file)
-    data = read_shuffle(feat_file)
+    train_feats = read_shuffle(feat_file[0])
+    dev_feats = read_shuffle(feat_file[1])
+    data = pd.concat([train_feats, dev_feats])
     dev_data = read_shuffle(dev_file)
     seq_data, char_data, word_index, char_index, max_seq, max_word, train_index = read_and_proc(tok_file, dev_tok_file)
     #seq_data, word_index, max_seq, train_index, test_index = read_seqs(tok_file, dev_tok_file)
@@ -307,7 +308,6 @@ def cross_validate(feat_file, tok_file, dev_file, dev_tok_file):
     preds_dnn = model_dnn.predict(feat_test_x).flatten()
     corr_dnn = pearson(test_y, preds_dnn)
     print("Pearson correlation for dev DNN:", corr_dnn)
-
  
     model_cnn_LSTM.fit([seq_train_x, char_train_x], train_y, epochs=2, batch_size=4)
     regr.fit(feat_train_x, train_y)
@@ -347,15 +347,16 @@ def cross_validate(feat_file, tok_file, dev_file, dev_tok_file):
 
     out.close()
     format.close()
-   
+
+    
 EFILE = "/data/s3094723/embeddings/en/w2v.twitter.edinburgh10M.400d.csv"
-feat_file = "/data/s3094723/extra_features/EI-reg/EI-reg-En-joy-train.tok.sent.lex"
-tok_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/En/train/EI-reg-En-joy-train.tok"
-dev_file = '/data/s3094723/extra_features/EI-reg/EI-reg-En-joy-dev.tok.sent.lex'
-dev_tok_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/En/dev/EI-reg-En-joy-dev.tok"
-format_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/En/dev/EI-reg-En-joy-dev.txt"
+feat_file_train = "/data/s3094723/extra_features/EI-reg/EI-reg-En-joy-train.tok.sent.lex"
+feat_file_dev = "/data/s3094723/extra_features/EI-reg/EI-reg-En-joy-dev.tok.sent.lex"
+tok_file = "../../../data/EI-reg/En/traindev/EI-reg-En-joy-traindev.tok"
+
+test_feat_file = '/data/s3094723/extra_features/EI-reg/EI-reg-En-joy-test.tok.sent.lex'
+test_tok_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/En/test/EI-reg-En-joy-test.tok"
+format_file = "/home/s3094723/SEMEVAL/affecthor/data/EI-reg/En/test/EI-reg-En-joy-test.txt"
 out_file = format_file + '.scores'
 
-
-cross_validate(feat_file, tok_file, dev_file, dev_tok_file)
-
+cross_validate([feat_file_train, feat_file_dev], tok_file, test_feat_file, test_tok_file)
